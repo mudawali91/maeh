@@ -10,6 +10,8 @@ class Registration extends MY_Controller {
 	public function __construct()
 	{
 		parent::__construct();
+		$this->load->model('Users');
+		$this->load->model('Logins');
 		$this->load->model('Status');
 		$this->load->model('States');
 		$this->load->model('Qualification_categories');
@@ -17,6 +19,15 @@ class Registration extends MY_Controller {
 		$this->load->model('Members');
 		$this->load->model('Member_qualifications');
 		$this->load->model('Member_organizations');
+
+		/*
+		# user type id
+		1: Super Admin 
+		2: Admin
+		*/
+
+		$this->uac = array(1,2);
+		$this->admin = 'admin/';
 	}
 	
 	public function index()
@@ -633,5 +644,170 @@ class Registration extends MY_Controller {
 		$data['display_message'] = $display_message;
 		
     	$this->load->view('registration_complete', $data);
+	}
+
+	public function list_page()
+	{
+		$data = array();
+		$view = 'error_404';
+
+		if ( in_array($this->session->curr_user_type_id, $this->uac) )
+		{
+			$view = $this->admin.'registration'; 
+		}
+
+		$this->data = $data;
+		$this->middle = $view;
+    	$this->layout_admin();
+	}
+
+	public function list_data()
+	{
+		$output = array();
+
+		if ( in_array($this->session->curr_user_type_id, $this->uac) )
+		{
+			$no = $_POST['start'];
+			$data = array();
+			$list = $this->Registrations->get_datatables();
+
+	        foreach ($list as $field) 
+	        {
+	            $no++;
+	            $row = array();
+
+	            $id = $field->registration_id;
+	            $id_enc = encryptor('encrypt',$id);
+
+	            $registration_status = $field->registration_status;
+
+	        	$registration_status_label = $field->registration_status_label;
+	        	$registration_status_color = $field->registration_status_color;
+	            $registration_status = '<span class="label label-'.$registration_status_color.'">'.$registration_status_label.'</span>';
+
+	            $address = $field->home_address;
+	            $address .= '<br />'.$field->home_postcode.' '.$field->home_city;
+	            $address .= '<br />'.$field->home_state;
+
+	            $registration_date = $field->registration_date;
+
+	            $row["id"] = $id_enc;
+	            $row[] = '<div class="checkbox checkbox-single">
+		                        <input type="checkbox" class="cb_single" id="cb_single_'.$id_enc.'" name="cb_single" value="'.$id_enc.'">
+                                <label></label>
+		                    </label>';
+	            $row[] = $no;
+	            $row[] = $field->name;
+	            $row[] = $field->icno;
+	            $row[] = $field->contactno_mobile;
+	            $row[] = $address;
+	            $row[] = $registration_date;
+	            $row[] = $registration_status;
+	            $row[] = 	'<a href="javascript:void(0)" class="table-action-btn btn_view" ids="'.$id_enc.'" title="View Data">
+	            				<i class="fa fa-eye fa-lg text-info"></i>
+	            			</a>
+	            			<a href="javascript:void(0)" class="table-action-btn btn_delete" ids="'.$id_enc.'" title="Delete Data">
+	            				<i class="fa fa-trash fa-lg text-danger"></i>
+	            			</a>';
+	 
+	            $data[] = $row;
+	        }
+	 
+	        $output = array(
+	            "draw" => $_POST['draw'],
+	            "recordsTotal" => $this->Registrations->count_all(),
+	            "recordsFiltered" => $this->Registrations->count_filtered(),
+	            "data" => $data,
+	        );
+		}
+
+        //output dalam format JSON
+        echo json_encode($output);
+	}
+
+	public function details($ids)
+	{
+        $data = array();
+		$view = 'error_404';
+
+		if ( in_array($this->session->curr_user_type_id, $this->uac) )
+		{
+			$selected_id_enc = $ids;
+	        $selected_id = encryptor('decrypt', $selected_id_enc);
+
+			$data['states'] = $this->States->list_dd(); 
+			$data['qualification_categories'] = $this->Qualification_categories->list_dd();
+			$data['status_list'] = $this->Status->list_dd();
+
+			$data['registration_data'] = $this->Registrations->read_join_2($selected_id);
+			$view = $this->admin.'registration_form'; 
+		}
+
+		$this->data = $data;
+		$this->middle = $view;
+    	$this->layout_admin();
+	}
+
+	public function qualification_details()
+	{
+		$registration_id_enc = $this->input->post('ids_1');
+	    $registration_id = encryptor('decrypt', $registration_id_enc);
+		$member_id_enc = $this->input->post('ids_2');
+	    $member_id = encryptor('decrypt', $member_id_enc);
+
+		$filter_member_qualification = array('a.member_id' => $member_id);
+		$qualification_data = $this->Member_qualifications->list_data($filter_member_qualification);
+
+		$output = '';
+
+    	if ( is_array($qualification_data) && count($qualification_data) > 0 )
+    	{
+    		foreach ( $qualification_data as $key => $val )
+    		{
+    			$id = $val->id;
+    			$qualification_category = $val->qualification_category;
+    			$qualification_title = $val->qualification_title;
+    			$qualification_year = $val->qualification_year;
+    			$qualification_institution = $val->qualification_institution;
+
+		        $output .= '<tr>
+					            <th scope="row">
+					            	<input type="hidden" name="qualification_category_id[]" id="qualification_category_id_'.$id.'" class="form-control input-sm" value="'.$id.'" />
+					            	<input type="text" name="qualification_category[]" id="qualification_category_'.$qualification_category.'" class="form-control input-sm" value="'.$qualification_category.'" readonly />
+					            </th>
+					            <td>
+					            	<input type="text" name="qualification_title[]" id="qualification_title_'.$id.'" class="form-control input-sm turn_uppercase" value="'.$qualification_title.'" readonly />
+					            </td>
+					            <td>
+					            	<input type="text" name="qualification_year[]" id="qualification_year_'.$id.'" class="form-control input-sm turn_uppercase qualification_year" value="'.$qualification_year.'" readonly />
+					            </td>
+					            <td>
+					            	<input type="text" name="qualification_institution[]" id="qualification_institution_'.$id.'" class="form-control input-sm turn_uppercase" value="'.$qualification_institution.'" readonly />
+					            </td>
+					        </tr>';
+    		}
+    	}
+
+    	echo $output;
+	}
+
+	public function delete()
+	{
+		$selected_id = $this->input->post('ids');
+		$selected_id_arr = array();
+		$data = 0;
+
+		if ( !empty($selected_id) )
+		{
+			$selected_id_arr = explode(',', $selected_id);
+			array_walk($selected_id_arr, 'encryptor_multiple', 'decrypt'); // call function encryptor_multiple from helper
+		}
+
+		if ( is_array($selected_id_arr) && count($selected_id_arr) > 0 )
+		{
+			$data = $this->Registrations->delete_data($selected_id_arr);
+		}
+		
+		echo json_encode(array('rst'=>$data));
 	}
 }

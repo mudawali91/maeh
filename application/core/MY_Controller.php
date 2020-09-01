@@ -20,7 +20,7 @@ class MY_Controller extends CI_Controller
 
 	public function update_status($selected_status_id, $selected_status, $selected_id)
 	{
-		$this->load->model('Applications');
+		$this->load->model('Registrations');
 		$status_app = $this->Status->field_array($selected_status_id);
 				
 		$status_id = $selected_status_id;
@@ -28,67 +28,60 @@ class MY_Controller extends CI_Controller
 		
 		if ( count($status_app) > 0 )
 		{
-			$status_id = $status_app->status_id;
+			$status_id = $status_app->id;
 			$status = $status_app->status;
 		}
 		
-		$data_upd = array(  "status_id"	=> $status_id,
-							"status"	=> $status,
-							"updated"	=> getDateTime(),
-						 );
+		$data_update = array(  "registration_status" => $status_id,
+        					   "updated" => getDateTime(),
+        					 );
 									
-		$id_upd = $this->Applications->update_selected($selected_id, $data_upd);
+		$rst_update = $this->Registrations->update_data($selected_id, $data_update);
 		
-		return $id_upd;
+		return $rst_update;
 	}
 	
     //Load layout    
     public function layout() 
     {
-		// if( empty($this->session->curr_users_id) || $this->session->curr_users_id == '' )
+		// if( empty($this->session->curr_login_id) || $this->session->curr_login_id == '' )
         // {
-            // $text = '<div class="alert alert-info">
+            // $text = '<div class="alert alert-info input-sm m-l-5 m-r-5">
                         // <button class="close" data-close="alert"></button>
                         // <span> Please login. </span>
                      // </div>';
-            // $this->session->set_flashdata('login_res', $text);
+            // $this->session->set_flashdata('login_result', $text);
             // redirect('login');
             // die();
         // }
-		
-        //check user is login or not
-        // $this->Users->is_login();
 
         // making temlate and send data to view.
-        $this->template['index_header']   = $this->load->view('layout/index_header', $this->data, true);
-        $this->template['index_top_logo']   = $this->load->view('layout/index_top_logo', $this->data, true);
-        $this->template['index_top_menu']   = $this->load->view('layout/index_top_menu', $this->data, true);
-        $this->template['index_left_menu']   = $this->load->view('layout/index_left_menu', $this->data, true);
-        $this->template['middle'] = $this->load->view($this->middle, $this->data, true);
-        $this->load->view('layout/index', $this->template);
+        // $this->template['index_header'] = $this->load->view('layout/index_header', $this->data, true);
+        // $this->template['index_top_logo'] = $this->load->view('layout/index_top_logo', $this->data, true);
+        // $this->template['index_top_menu'] = $this->load->view('layout/index_top_menu', $this->data, true);
+        // $this->template['index_left_menu'] = $this->load->view('layout/index_left_menu', $this->data, true);
+        // $this->template['middle'] = $this->load->view($this->middle, $this->data, true);
+        // $this->load->view('layout/index', $this->template);
     }
 	
 	//Load layout    
     public function layout_admin() 
     {
-		if( empty($this->session->curr_users_id) || $this->session->curr_users_id == '' )
+		if( empty($this->session->curr_login_id) || $this->session->curr_login_id == '' )
         {
-            $text = '<div class="alert alert-info">
+            $text = '<div class="alert alert-info input-sm m-l-5 m-r-5">
                         <button class="close" data-close="alert"></button>
                         <span> Your session expire. Please login again. </span>
                      </div>';
-            $this->session->set_flashdata('login_res', $text);
+            $this->session->set_flashdata('login_result', $text);
             redirect('admin');
             die();
         }
 
-        //check user is login or not
-        // $this->Users->is_login();
-
         // making temlate and send data to view.
-        $this->template['index_header']   = $this->load->view('admin/layout/index_header', $this->data, true);
-        $this->template['index_top_menu']   = $this->load->view('admin/layout/index_top_menu', $this->data, true);
-        $this->template['index_left_menu']   = $this->load->view('admin/layout/index_left_menu', $this->data, true);
+        $this->template['index_header'] = $this->load->view('admin/layout/index_header', $this->data, true);
+        $this->template['index_top_menu'] = $this->load->view('admin/layout/index_top_menu', $this->data, true);
+        $this->template['index_left_menu'] = $this->load->view('admin/layout/index_left_menu', $this->data, true);
         $this->template['middle'] = $this->load->view($this->middle, $this->data, true);
         $this->load->view('admin/layout/index', $this->template);
     }

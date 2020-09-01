@@ -28,13 +28,21 @@ class Member_qualifications extends CI_Model
 		return $q;
 	}
 
-	function list_data()
+	function list_data($find_opt=array())
 	{
 		$db = $this->db;
-		$db->select('id, member_id, qualification_category_id, qualification_title, qualification_year, qualification_institution');
-		$db->where('active','1');
-		$db->order_by('qualification_year','ASC');
-		$q = $db->get($this->table)->result();
+		$db->select('a.id, a.member_id, a.qualification_category_id, a.qualification_title, a.qualification_year, a.qualification_institution, b.name AS qualification_category');
+		$db->from($this->table.' a');
+		$db->join('qualification_categories b', 'b.id = a.qualification_category_id', 'LEFT');
+		$db->where('a.active','1');
+
+		foreach ( $find_opt as $key => $val )
+    	{
+    		$db->where($key, $val);
+    	}
+
+		$db->order_by('a.qualification_year','ASC');
+		$q = $db->get()->result();
 		return $q;
 	}
 

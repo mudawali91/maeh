@@ -61,9 +61,7 @@ $route['registration-upload'] = 'Registration/upload_file';
 $route['registration-submit'] = 'Registration/save';
 $route['registration-complete/(:any)'] = 'Registration/registration_complete/$1';
 
-// $route['application-form'] = 'start';
-// $route['application-submit'] = 'application/application_submit';
-// $route['application-complete'] = 'application/application_complete';
+$route['registration/qualification/details'] = 'Registration/qualification_details';
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<< END PUBLIC USER SITE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -71,10 +69,15 @@ $route['registration-complete/(:any)'] = 'Registration/registration_complete/$1'
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ADMIN SITE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 /*----------  LOGIN  ----------*/
-$route['admin'] = admin_path.'start/login';
-$route['admin/login'] = admin_path.'start/login_submit';
-$route['admin/logout'] = admin_path.'start/logout';
-$route['admin/forgot-password'] = admin_path.'start/forgot_password';
+$route['admin'] = admin_path.'Start/login';
+$route['admin/login'] = admin_path.'Start/login_submit';
+$route['admin/logout'] = admin_path.'Start/logout';
+$route['admin/forgot-password'] = admin_path.'Start/forgot_password';
+
+$route['admin/dashboard'] = admin_path.'Start/index';
+$route['admin/registration'] = 'Registration/list_page';
+$route['admin/registration/list'] = 'Registration/list_data';
+$route['admin/registration/(:any)'] = 'Registration/details/$1';
 
 // SETTINGS
 

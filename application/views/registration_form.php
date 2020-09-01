@@ -417,8 +417,8 @@ $(function(){
 								                    <input type="text" name="name" id="name" parsley-trigger="change" <?=$required_field;?> placeholder="Name" class="form-control input-sm turn_uppercase" value="" />
 								                </div>
 								                <div class="form-group">
-								                    <label for="icno">NRIC No <?=STARFIELD;?></label>
-								                    <input type="text" name="icno" id="icno" parsley-trigger="change" <?=$required_field;?> placeholder="NRIC No" class="form-control input-sm mask_nric" value="" />
+								                    <label for="icno">IC No <?=STARFIELD;?></label>
+								                    <input type="text" name="icno" id="icno" parsley-trigger="change" <?=$required_field;?> placeholder="IC No" class="form-control input-sm mask_nric" value="" />
 								                </div> 
 								                <div class="form-group">
 								                    <label for="contactno_mobile">HP No <?=STARFIELD;?></label>

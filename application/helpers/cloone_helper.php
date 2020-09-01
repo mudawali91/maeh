@@ -741,5 +741,15 @@ function verify_signature($merkey, $mercode, $payid, $reffno, $amt, $curr, $stat
 	
 	return $signature_status;
 }
+
+function format_namecode($name, $code='')
+{
+	return $name . ( !empty($code) ? ' ('.$code.')' : '' );
+}
+
+function encryptor_multiple(&$val, $fn, $action)
+{
+	$val = encryptor($action, $val);
+}
 	
 ?>

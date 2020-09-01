@@ -112,10 +112,11 @@
                                         </a>
                                     </h2>
 									<h5 class="text-center text-uppercase font-bold m-b-5 m-t-5">MALAYSIAN ASSOCIATION OF <br /> ENVIRONMENTAL HEALTH <br /> (MAEH)</h5>
-									<p class="m-l-5 m-b-0">Login to your account</p>
+									<?=$this->session->flashdata('login_result');?>
+									<p class="m-l-5 m-r-5 m-b-0">Login to your account</p>
                                 </div>
                                 <div class="account-content">
-                                    <form class="form-horizontal" action="#">
+                                    <form class="form-horizontal" action="<?=site_url('admin/login')?>" method="POST">
                                         <div class="form-group m-b-20 row">
                                             <div class="col-12">
                                                 <label for="username">Username</label>
