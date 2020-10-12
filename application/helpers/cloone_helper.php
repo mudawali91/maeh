@@ -153,6 +153,22 @@ function display_datetime($show_type='DATETIME', $datetime) {
 			$output_datetime = date('H:i A', strtotime($datetime));
 		}
 		
+	} else if ( strtoupper($show_type) == 'DB_DATE' ) {
+		
+		if ( $datetime == '' || $datetime == '0000-00-00' ) {
+			$output_datetime = NULL;
+		} else {
+			$output_datetime = date('Y-m-d', strtotime($datetime));
+		}
+		
+	} else if ( strtoupper($show_type) == 'DB_DATETIME' ) {
+		
+		if ( $datetime == '' || $datetime == '0000-00-00 00:00:00' ) {
+			$output_datetime = NULL;
+		} else {
+			$output_datetime = date('Y-m-d H:i:s', strtotime($datetime));
+		}
+		
 	} else {
 		
 		if ( $datetime == '' || $datetime == '0000-00-00 00:00:00' ) {
