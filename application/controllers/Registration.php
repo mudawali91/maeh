@@ -62,8 +62,8 @@ class Registration extends MY_Controller {
 		$registration_agreement = $this->input->post('registration_agreement');
 		$registration_payment = $this->input->post('registration_payment');
 		$payment_receipt = $this->input->post('payment_receipt_uploaded');
-		$payment_status = null;
-		$registration_status = null;
+		$payment_status = NULL;
+		$registration_status = NULL;
 
 		$name = $this->input->post('name');
 		$icno = $this->input->post('icno');
@@ -71,7 +71,7 @@ class Registration extends MY_Controller {
 		$contactno_mobile = $this->input->post('contactno_mobile');
 		$contactno_mobile = str_replace('_', '', $contactno_mobile);
 		$email = $this->input->post('email');
-		$dob = $this->input->post('dob');
+		$dob = display_datetime('DB_DATE', $this->input->post('dob'));
 		$contactno_home = $this->input->post('contactno_home');
 		$contactno_home = str_replace('_', '', $contactno_home);
 		$home_address = $this->input->post('home_address');
@@ -85,7 +85,7 @@ class Registration extends MY_Controller {
 		$office_postcode = $this->input->post('office_postcode');
 		$office_city = $this->input->post('office_city');
 		$office_state = $this->input->post('office_state');
-		$member_status = null;
+		$member_status = NULL;
 
 		$qualification_category 	= $this->input->post('qualification_category');
 		$qualification_title 		= $this->input->post('qualification_title');
@@ -203,8 +203,8 @@ class Registration extends MY_Controller {
 			else
 			{
 				$set_active = ( $submit_form == 1 ) ? 1 : 0;
-				$set_member_status = ( $submit_form == 1 ) ? 1 : null; 
-				$set_registration_status = ( $submit_form == 1 ) ? 1 : null; 
+				$set_member_status = ( $submit_form == 1 ) ? 1 : NULL; 
+				$set_registration_status = ( $submit_form == 1 ) ? 1 : NULL; 
 
 				// update registration
 				$data_update_registration = array(
@@ -689,7 +689,7 @@ class Registration extends MY_Controller {
 	            $address .= '<br />'.$field->home_postcode.' '.$field->home_city;
 	            $address .= '<br />'.$field->home_state;
 
-	            $registration_date = $field->registration_date;
+	            $registration_date = display_datetime('DATETIME2', $field->registration_date);
 
 	            $row["id"] = $id_enc;
 	            $row[] = '<div class="checkbox checkbox-single">
@@ -725,6 +725,83 @@ class Registration extends MY_Controller {
         echo json_encode($output);
 	}
 
+	public function total()
+	{
+		$rst = 0;
+		$data = array();
+		$msg = '';
+
+		$data = $this->Registrations->read_total();
+
+		$output = array(
+						'rst' 	=> $rst,
+						'data' 	=> $data,
+						'msg' 	=> $msg
+						);
+
+		echo json_encode($output);
+	}
+
+	public function delete()
+	{
+		$selected_id = $this->input->post('ids');
+		$selected_id_arr = array();
+		$data = 0;
+
+		if ( !empty($selected_id) )
+		{
+			$selected_id_arr = explode(',', $selected_id);
+			array_walk($selected_id_arr, 'encryptor_multiple', 'decrypt'); // call function encryptor_multiple from helper
+		}
+
+		if ( is_array($selected_id_arr) && count($selected_id_arr) > 0 )
+		{
+			$data = $this->Registrations->delete_data($selected_id_arr);
+		}
+		
+		echo json_encode(array('rst'=>$data));
+	}
+
+	public function approval()
+	{
+		$registration_id_enc = $this->input->post('ids_1');
+	    $registration_id = encryptor('decrypt', $registration_id_enc);
+		$member_id_enc = $this->input->post('ids_2');
+	    $member_id = encryptor('decrypt', $member_id_enc);
+		$status = $this->input->post('status');
+
+		$rst = 0;
+		$data = array();
+		$msg = '';
+
+		$data_update = array(
+							'registration_status' => $status,
+							'approval_at' => getDateTime(),
+							'approval_by' => $this->session->curr_user_id,
+							'updated' => getDateTime(),
+							);
+		$rst = $this->Registrations->update_data($registration_id, $data_update);
+
+		$status_label = ( $status == 3 ) ? ' Reject' : ' Approve';
+
+		if ( $rst > 0 )
+		{
+			$msg = 'Registration '.$status_label.' Succesful';
+		}
+		else
+		{
+			$msg = 'Registration '.$status_label.' Fail';
+		}
+
+		$output = array(
+						'rst' 	=> $rst,
+						'data' 	=> $data,
+						'msg' 	=> $msg
+						);
+
+		echo json_encode($output);
+	}
+
 	public function details($ids)
 	{
         $data = array();
@@ -740,6 +817,31 @@ class Registration extends MY_Controller {
 			$data['status_list'] = $this->Status->list_dd();
 
 			$data['registration_data'] = $this->Registrations->read_join_2($selected_id);
+			$data['registration_data']->dob = display_datetime('DATE', $data['registration_data']->dob);
+			$data['registration_data']->registration_date = display_datetime('DATETIME2', $data['registration_data']->registration_date);
+
+			$attachment_name = $data['registration_data']->payment_receipt;
+
+			$attachment_preview = '<i class="fa fa-file-o fa-3x"></i><p>No File </p>';
+			
+			if ( !empty($attachment_name) )
+			{
+				$attachment_ext = pathinfo($attachment_name, PATHINFO_EXTENSION);
+
+				if ( in_array(strtolower($attachment_ext), array('jpeg', 'jpg', 'png')) )
+				{
+					$attachment_preview = '<i class="fa fa-file-image-o fa-3x"></i>';
+				}
+				else if ( strtolower($attachment_ext) == 'pdf' )
+				{
+					$attachment_preview = '<i class="fa fa-file-pdf-o fa-3x"></i>';
+				}
+
+				$attachment_preview .= '<p><a href="'.base_url().'upload_files/payment_receipts/'.$attachment_name.'" target="_blank">Download</a></p>';
+			}
+
+			$data['registration_data']->attachment_preview['payment_receipt'] = $attachment_preview;
+
 			$view = $this->admin.'registration_form'; 
 		}
 
@@ -771,10 +873,10 @@ class Registration extends MY_Controller {
     			$qualification_institution = $val->qualification_institution;
 
 		        $output .= '<tr>
-					            <th scope="row">
+					            <td>
 					            	<input type="hidden" name="qualification_category_id[]" id="qualification_category_id_'.$id.'" class="form-control input-sm" value="'.$id.'" />
-					            	<input type="text" name="qualification_category[]" id="qualification_category_'.$qualification_category.'" class="form-control input-sm" value="'.$qualification_category.'" readonly />
-					            </th>
+					            	<input type="text" name="qualification_category[]" id="qualification_category_'.$id.'" class="form-control input-sm" value="'.$qualification_category.'" readonly />
+					            </td>
 					            <td>
 					            	<input type="text" name="qualification_title[]" id="qualification_title_'.$id.'" class="form-control input-sm turn_uppercase" value="'.$qualification_title.'" readonly />
 					            </td>
@@ -791,23 +893,37 @@ class Registration extends MY_Controller {
     	echo $output;
 	}
 
-	public function delete()
+	public function organization_details()
 	{
-		$selected_id = $this->input->post('ids');
-		$selected_id_arr = array();
-		$data = 0;
+		$registration_id_enc = $this->input->post('ids_1');
+	    $registration_id = encryptor('decrypt', $registration_id_enc);
+		$member_id_enc = $this->input->post('ids_2');
+	    $member_id = encryptor('decrypt', $member_id_enc);
 
-		if ( !empty($selected_id) )
-		{
-			$selected_id_arr = explode(',', $selected_id);
-			array_walk($selected_id_arr, 'encryptor_multiple', 'decrypt'); // call function encryptor_multiple from helper
-		}
+		$filter_member_qualification = array(); //array('a.member_id' => $member_id);
+		$organization_data = $this->Member_organizations->list_data($filter_member_qualification);
 
-		if ( is_array($selected_id_arr) && count($selected_id_arr) > 0 )
-		{
-			$data = $this->Registrations->delete_data($selected_id_arr);
-		}
-		
-		echo json_encode(array('rst'=>$data));
+		$output = '';
+
+    	if ( is_array($organization_data) && count($organization_data) > 0 )
+    	{
+    		foreach ( $organization_data as $key => $val )
+    		{
+    			$id = $val->id;
+    			$organization_name = $val->organization_name;
+    			$organization_post = $val->organization_post;
+
+		        $output .= '<tr>
+					            <td>
+					            	<input type="text" name="organization_name[]" id="organization_name_'.$id.'" class="form-control input-sm" value="'.$organization_name.'" readonly />
+					            </td>
+					            <td>
+					            	<input type="text" name="organization_post[]" id="organization_post_'.$id.'" class="form-control input-sm turn_uppercase" value="'.$organization_post.'" readonly />
+					            </td>
+					        </tr>';
+    		}
+    	}
+
+    	echo $output;
 	}
 }
