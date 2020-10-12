@@ -62,6 +62,7 @@ $route['registration-submit'] = 'Registration/save';
 $route['registration-complete/(:any)'] = 'Registration/registration_complete/$1';
 
 $route['registration/qualification/details'] = 'Registration/qualification_details';
+$route['registration/organization/details'] = 'Registration/organization_details';
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<< END PUBLIC USER SITE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -77,6 +78,9 @@ $route['admin/forgot-password'] = admin_path.'Start/forgot_password';
 $route['admin/dashboard'] = admin_path.'Start/index';
 $route['admin/registration'] = 'Registration/list_page';
 $route['admin/registration/list'] = 'Registration/list_data';
+$route['admin/registration/total'] = 'Registration/total';
+$route['admin/registration/delete'] = 'Registration/delete';
+$route['admin/registration/approval'] = 'Registration/approval';
 $route['admin/registration/(:any)'] = 'Registration/details/$1';
 
 // SETTINGS
