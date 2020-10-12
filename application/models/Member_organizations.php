@@ -28,11 +28,17 @@ class Member_organizations extends CI_Model
 		return $q;
 	}
 
-	function list_data()
+	function list_data($find_opt=array())
 	{
 		$db = $this->db;
 		$db->select('id, member_id, organization_name, organization_post');
 		$db->where('active','1');
+
+		foreach ( $find_opt as $key => $val )
+    	{
+    		$db->where($key, $val);
+    	}
+    	
 		$db->order_by('organization_name','ASC');
 		$q = $db->get($this->table)->result();
 		return $q;
