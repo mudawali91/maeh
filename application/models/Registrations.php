@@ -57,6 +57,23 @@ class Registrations extends CI_Model
 		return $q;
 	}
 
+	function read_total()
+	{
+		$db = $this->db;
+		$db->select('COUNT(a.id) AS total_all,
+					COUNT(CASE WHEN a.registration_status = 1 THEN a.id ELSE NULL END) AS total_pending, 
+					COUNT(CASE WHEN a.registration_status = 2 THEN a.id ELSE NULL END) AS total_approved, 
+					COUNT(CASE WHEN a.registration_status = 3 THEN a.id ELSE NULL END) AS total_rejected
+					');
+		$db->from($this->table.' a');
+		$db->join('members b', 'b.registration_id = a.id AND b.id = a.member_id','INNER');
+		$db->where('a.active',1);
+		$db->where('b.active',1);
+		$db->limit(1);
+		$q = $db->get()->row();
+		return $q;
+	}
+
 	function list_data()
 	{
 		$db = $this->db;
