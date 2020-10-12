@@ -20,61 +20,99 @@
 <div class="row">
     <div class="col-12">
         <div class="card-box">
+
+            <!-- <h4 class="header-title m-b-15 m-t-0"></h4> -->
+
+            <div class="text-center m-b-5">
+                <div class="row">
+                    <div class="col-xs-6 col-sm-3">
+                        <div class="m-t-20 m-b-20">
+                            <h3 class="m-b-10 total_all"></h3>
+                            <p class="text-uppercase m-b-5 font-13 font-600">Total</p>
+                        </div>
+                    </div>
+                    <div class="col-xs-6 col-sm-3">
+                        <div class="m-t-20 m-b-20">
+                            <h3 class="m-b-10 text-warning total_pending"></h3>
+                            <p class="text-uppercase m-b-5 font-13 font-600">Pending</p>
+                        </div>
+                    </div>
+                    <div class="col-xs-6 col-sm-3">
+                        <div class="m-t-20 m-b-20">
+                            <h3 class="m-b-10 text-success total_approved"></h3>
+                            <p class="text-uppercase m-b-5 font-13 font-600">Approved</p>
+                        </div>
+                    </div>
+                    <div class="col-xs-6 col-sm-3">
+                        <div class="m-t-20 m-b-20">
+                            <h3 class="m-b-10 text-danger total_rejected"></h3>
+                            <p class="text-uppercase m-b-5 font-13 font-600">Rejected</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+			<hr class="split"/>
+
+			<!-- start row filter and search -->
+			<div class="col-md-12 m-l-5">
+				<h4 class="m-t-0 m-b-5 header-title">
+					<span id="click_filter">Filter</span>
+		        </h4>
+		        <div class="div_form_filter">
+			        <form id="form_filter" name="form_filter" action="" method="post" enctype="multipart/form-data">
+								
+						<div class="row m-t-20">
+							<div class="col-sm-3">
+								<div class="form-group">
+									<label>IC No</label>
+									<input type="text" class="form-control input-sm" id="filter_icno" name="filter_icno" placeholder="IC No" value="" />
+								</div>
+							</div>
+							<div class="col-sm-3">
+								<div class="form-group">
+									<label>Name</label>
+									<input type="text" class="form-control input-sm turn_uppercase" id="filter_name" name="filter_name" placeholder="Name" value="" />
+								</div>
+							</div>
+						</div>	
+
+						<div class="text-left">
+							<!-- <button type="submit" name="btn_search" id="btn_search" class="btn btn-info btn-sm"><i class="fa fa-search"></i> Search</button>
+							<button type="button" name="btn_reset" id="btn_reset" class="btn btn-default btn-bordered btn-sm"><i class="fa fa-eraser"></i> Reset</button> -->
+						</div>
+					</form>
+				</div>
+			</div>
+			<!-- end row filter and search -->
+
 			<form id="form_table" name="form_table" action="" method="post" enctype="multipart/form-data">
-	            <!-- <h4 class="header-title m-b-15 m-t-0"></h4> -->
 
-	            <div class="text-center m-b-30">
-	                <div class="row">
-	                    <div class="col-xs-6 col-sm-3">
-	                        <div class="m-t-20 m-b-20">
-	                            <h3 class="m-b-10">25563</h3>
-	                            <p class="text-uppercase m-b-5 font-13 font-600">Total</p>
-	                        </div>
-	                    </div>
-	                    <div class="col-xs-6 col-sm-3">
-	                        <div class="m-t-20 m-b-20">
-	                            <h3 class="m-b-10 text-warning">6952</h3>
-	                            <p class="text-uppercase m-b-5 font-13 font-600">Pending</p>
-	                        </div>
-	                    </div>
-	                    <div class="col-xs-6 col-sm-3">
-	                        <div class="m-t-20 m-b-20">
-	                            <h3 class="m-b-10 text-success">18361</h3>
-	                            <p class="text-uppercase m-b-5 font-13 font-600">Approved</p>
-	                        </div>
-	                    </div>
-	                    <div class="col-xs-6 col-sm-3">
-	                        <div class="m-t-20 m-b-20">
-	                            <h3 class="m-b-10 text-danger">250</h3>
-	                            <p class="text-uppercase m-b-5 font-13 font-600">Rejected</p>
-	                        </div>
-	                    </div>
-	                </div>
-	            </div>
+                <div class="table-responsive" data-pattern="priority-columns">
+		            <table class="table table-hover table-bordered table-colored table-primary" cellspacing="0" width="100%" id="datatable_custom">
+		                <thead>
+			                <tr>
+			                    <th class="text-center no-sort">
+				                    <div class="checkbox checkbox-single">
+		                                <input type="checkbox" class="cb_all" id="cb_all" name="cb_all" value="">
+		                                <label></label>
+		                            </div>
+			                    </th>
+			                    <th class="text-center">No</th>
+			                    <th class="text-center">Name</th>
+			                    <th class="text-center">IC No</th>
+			                    <th class="text-center">HP No</th>
+			                    <th class="text-center">Address</th>
+			                    <th class="text-center">Registered Date</th>
+			                    <th class="text-center">Status</th>
+			                    <th class="text-center no-sort">Action</th>
+			                </tr>
+		                </thead>
 
-	            <table class="table table-hover table-bordered table-colored table-primary" cellspacing="0" width="100%" id="datatable_custom">
-	                <thead>
-		                <tr>
-		                    <th class="text-center no-sort">
-			                    <div class="checkbox checkbox-single">
-	                                <input type="checkbox" class="cb_all" id="cb_all" name="cb_all" value="">
-	                                <label></label>
-	                            </div>
-		                    </th>
-		                    <th class="text-center">No</th>
-		                    <th class="text-center">Name</th>
-		                    <th class="text-center">IC No</th>
-		                    <th class="text-center">HP No</th>
-		                    <th class="text-center">Address</th>
-		                    <th class="text-center">Registered Date</th>
-		                    <th class="text-center">Status</th>
-		                    <th class="text-center no-sort">Action</th>
-		                </tr>
-	                </thead>
-
-	                <tbody>
-	                </tbody>
-	            </table>
+		                <tbody>
+		                </tbody>
+		            </table>
+		        </div>
 
 				<input type="hidden" id="selected_id" name="selected_id" value="" />
 
@@ -86,8 +124,37 @@
 
 <script type="text/javascript">
 
+function calculate_total()
+{
+	var dataString = "";
+
+	$('.total_all').text('0');
+	$('.total_pending').text('0');
+	$('.total_approved').text('0');
+	$('.total_rejected').text('0');
+
+	$.ajax({
+		type: "POST",
+		url: "<?php echo site_url('admin/registration/total')?>",
+		data: dataString,
+		dataType: 'json',
+		cache: false,
+		success: function(response) {
+			// console.log("response",response);
+			$('.total_all').text(response.data.total_all);
+			$('.total_pending').text(response.data.total_pending);
+			$('.total_approved').text(response.data.total_approved);
+			$('.total_rejected').text(response.data.total_rejected);
+		},
+		complete: function(){
+		}
+	});
+}
+
 $(function(){
 	
+	calculate_total();
+
 	$('#datatable_custom').DataTable({
 	    "processing": true, 
 	    "serverSide": true, 
