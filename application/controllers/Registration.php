@@ -19,6 +19,7 @@ class Registration extends MY_Controller {
 		$this->load->model('Members');
 		$this->load->model('Member_qualifications');
 		$this->load->model('Member_organizations');
+        $this->load->model('Reference_runnings');
 
 		/*
 		# user type id
@@ -204,10 +205,19 @@ class Registration extends MY_Controller {
 			{
 				$set_active = ( $submit_form == 1 ) ? 1 : 0;
 				$set_member_status = ( $submit_form == 1 ) ? 1 : NULL; 
-				$set_registration_status = ( $submit_form == 1 ) ? 1 : NULL; 
+				$set_registration_status = ( $submit_form == 1 ) ? 1 : NULL;
+
+				$registration_no = NULL;
+
+				if ( $submit_form == 1 )
+				{
+					// generate registration no once submit
+					$registration_no = $this->Reference_runnings->generate_reference_no('REGISTRATION', date('Y'));
+				}
 
 				// update registration
 				$data_update_registration = array(
+													'registration_no'			=> $registration_no,
 													'payment_status' 			=> $payment_status,
 													'registration_status' 		=> $set_registration_status,
 													'updated' 					=> getDateTime(),
@@ -222,7 +232,7 @@ class Registration extends MY_Controller {
 
 				if ( $rst_registration > 0 )
 				{
-					// update registration
+					// update member
 					$data_update_member = array(
 													'name' 				=> $name,
 													'icno' 				=> $icno,
@@ -567,7 +577,7 @@ class Registration extends MY_Controller {
         die();
 	}
 
-	function registration_complete($id)
+	public function registration_complete($id)
 	{
 		$registration_id_enc = $id;
 		$registration_id =  encryptor('decrypt',$registration_id_enc);
@@ -653,6 +663,7 @@ class Registration extends MY_Controller {
 
 		if ( in_array($this->session->curr_user_type_id, $this->uac) )
 		{
+			$data['status_list'] = $this->Status->list_dd();
 			$view = $this->admin.'registration'; 
 		}
 
@@ -685,9 +696,9 @@ class Registration extends MY_Controller {
 	        	$registration_status_color = $field->registration_status_color;
 	            $registration_status = '<span class="label label-'.$registration_status_color.'">'.$registration_status_label.'</span>';
 
-	            $address = $field->home_address;
-	            $address .= '<br />'.$field->home_postcode.' '.$field->home_city;
-	            $address .= '<br />'.$field->home_state;
+	            // $address = $field->home_address;
+	            // $address .= '<br />'.$field->home_postcode.' '.$field->home_city;
+	            // $address .= '<br />'.$field->home_state;
 
 	            $registration_date = display_datetime('DATETIME2', $field->registration_date);
 
@@ -696,19 +707,19 @@ class Registration extends MY_Controller {
 		                        <input type="checkbox" class="cb_single" id="cb_single_'.$id_enc.'" name="cb_single" value="'.$id_enc.'">
                                 <label></label>
 		                    </label>';
-	            $row[] = $no;
-	            $row[] = $field->name;
-	            $row[] = $field->icno;
-	            $row[] = $field->contactno_mobile;
-	            $row[] = $address;
-	            $row[] = $registration_date;
-	            $row[] = $registration_status;
 	            $row[] = 	'<a href="javascript:void(0)" class="table-action-btn btn_view" ids="'.$id_enc.'" title="View Data">
 	            				<i class="fa fa-eye fa-lg text-info"></i>
 	            			</a>
 	            			<a href="javascript:void(0)" class="table-action-btn btn_delete" ids="'.$id_enc.'" title="Delete Data">
 	            				<i class="fa fa-trash fa-lg text-danger"></i>
 	            			</a>';
+	            $row[] = $no;
+	            $row[] = $field->registration_no;
+	            $row[] = $field->name;
+	            $row[] = $field->icno;
+	            $row[] = $field->contactno_mobile;
+	            $row[] = $registration_date;
+	            $row[] = $registration_status;
 	 
 	            $data[] = $row;
 	        }
@@ -731,7 +742,23 @@ class Registration extends MY_Controller {
 		$data = array();
 		$msg = '';
 
-		$data = $this->Registrations->read_total();
+		$filter_registration_no = $this->input->post('filter_registration_no');
+    	$filter_icno = $this->input->post('filter_icno');
+    	$filter_name = $this->input->post('filter_name');
+    	$filter_date_start = $this->input->post('filter_date_start');
+    	$filter_date_end = $this->input->post('filter_date_end');
+    	$filter_status = $this->input->post('filter_status');
+
+		$filter = array(
+						'filter_registration_no'	=> $filter_registration_no,
+						'filter_icno' 				=> $filter_icno,
+						'filter_name' 				=> $filter_name,
+						'filter_date_start' 		=> $filter_date_start,
+						'filter_date_end' 			=> $filter_date_end,
+						'filter_status'				=> $filter_status,
+						);
+
+		$data = $this->Registrations->read_total($filter);
 
 		$output = array(
 						'rst' 	=> $rst,
@@ -769,6 +796,7 @@ class Registration extends MY_Controller {
 		$member_id_enc = $this->input->post('ids_2');
 	    $member_id = encryptor('decrypt', $member_id_enc);
 		$status = $this->input->post('status');
+		$approval_remarks = $this->input->post('approval_remarks');
 
 		$rst = 0;
 		$data = array();
@@ -776,6 +804,7 @@ class Registration extends MY_Controller {
 
 		$data_update = array(
 							'registration_status' => $status,
+							'approval_remarks' => $approval_remarks,
 							'approval_at' => getDateTime(),
 							'approval_by' => $this->session->curr_user_id,
 							'updated' => getDateTime(),

@@ -1,4 +1,11 @@
 <style>
+
+.input-group-addon 
+{
+	padding: 0.3rem 0.75rem !important;
+	font-size: 12px;
+}
+
 </style>
 
 <div class="row">
@@ -7,7 +14,7 @@
 	        <h4 class="page-title float-left">Registration List</h4>
 
 	        <ol class="breadcrumb float-right">
-	            <li class="breadcrumb-item">Registration</li>
+	            <li class="breadcrumb-item"><a href="javascript:void(0)">Registration</a></li>
 	            <li class="breadcrumb-item active">List</li>
 	        </ol>
 
@@ -56,30 +63,75 @@
 
 			<!-- start row filter and search -->
 			<div class="col-md-12 m-l-5">
+				<?php
+				/*
 				<h4 class="m-t-0 m-b-5 header-title">
 					<span id="click_filter">Filter</span>
 		        </h4>
+		        */
+		        ?>
 		        <div class="div_form_filter">
 			        <form id="form_filter" name="form_filter" action="" method="post" enctype="multipart/form-data">
 								
 						<div class="row m-t-20">
-							<div class="col-sm-3">
+							<div class="col-sm-4">
+								<div class="form-group">
+									<label>Reg. No</label>
+									<input type="text" class="form-control input-sm" id="filter_registration_no" name="filter_registration_no" placeholder="Registration No" value="" />
+								</div>
+							</div>
+							<div class="col-sm-4">
 								<div class="form-group">
 									<label>IC No</label>
 									<input type="text" class="form-control input-sm" id="filter_icno" name="filter_icno" placeholder="IC No" value="" />
 								</div>
 							</div>
-							<div class="col-sm-3">
+							<div class="col-sm-4">
 								<div class="form-group">
 									<label>Name</label>
 									<input type="text" class="form-control input-sm turn_uppercase" id="filter_name" name="filter_name" placeholder="Name" value="" />
 								</div>
 							</div>
-						</div>	
+						</div>
+						<div class="row">
+							<div class="col-sm-4">
+								<div class="form-group">
+									<label>Registration Date</label>
+			                		<div>
+					            		<div class="input-daterange input-group" id="date_range_registration_date">
+											<input type="text" class="form-control input-sm" id="filter_date_start" name="filter_date_start" value="" />
+											<span class="input-group-addon text-white b-0" style="background-color:#4489e4;">to</span>
+											<input type="text" class="form-control input-sm" id="filter_date_end" name="filter_date_end" value="" />
+										</div>
+									</div>
+								</div>	
+							</div>
+							<div class="col-sm-4">
+								<div class="form-group">
+									<label>Status</label>
+									<select class="form-control select-sm select2_field" id="filter_status" name="filter_status">
+									<option value="">All</option>
+									<?php
+										if ( is_array($status_list) && count($status_list) > 0 )
+										{
+											foreach ( $status_list as $key => $val )
+											{
+												$status_id = $val->id;
+												$status_name = $val->status;
+									?>
+											<option value="<?=$status_id;?>"><?=$status_name;?></option>
+									<?php
+											}
+										}
+									?>
+									</select>
+								</div>
+							</div>
+						</div>
 
 						<div class="text-left">
-							<!-- <button type="submit" name="btn_search" id="btn_search" class="btn btn-info btn-sm"><i class="fa fa-search"></i> Search</button>
-							<button type="button" name="btn_reset" id="btn_reset" class="btn btn-default btn-bordered btn-sm"><i class="fa fa-eraser"></i> Reset</button> -->
+							<button type="submit" name="btn_search" id="btn_search" class="btn btn-primary btn-bordered btn-sm"><i class="fa fa-search"></i> Search</button>
+							<button type="button" name="btn_reset" id="btn_reset" class="btn btn-inverse btn-bordered btn-sm"><i class="fa fa-eraser"></i> Reset</button>
 						</div>
 					</form>
 				</div>
@@ -98,14 +150,14 @@
 		                                <label></label>
 		                            </div>
 			                    </th>
-			                    <th class="text-center">No</th>
+			                    <th class="text-center no-sort">Action</th>
+			                    <th class="text-center no-sort">No</th>
+			                    <th class="text-center">Reg. No</th>
 			                    <th class="text-center">Name</th>
 			                    <th class="text-center">IC No</th>
 			                    <th class="text-center">HP No</th>
-			                    <th class="text-center">Address</th>
-			                    <th class="text-center">Registered Date</th>
+			                    <th class="text-center">Register Date</th>
 			                    <th class="text-center">Status</th>
-			                    <th class="text-center no-sort">Action</th>
 			                </tr>
 		                </thead>
 
@@ -126,7 +178,12 @@
 
 function calculate_total()
 {
-	var dataString = "";
+	var filter_registration_no = $('#filter_registration_no').val();
+	var filter_icno = $('#filter_icno').val();
+	var filter_name = $('#filter_name').val();
+	var filter_date_start = $('#filter_date_start').val();
+	var filter_date_end = $('#filter_date_end').val();
+	var filter_status = $('#filter_status').val();
 
 	$('.total_all').text('0');
 	$('.total_pending').text('0');
@@ -136,11 +193,11 @@ function calculate_total()
 	$.ajax({
 		type: "POST",
 		url: "<?php echo site_url('admin/registration/total')?>",
-		data: dataString,
+		data: { filter_registration_no : filter_registration_no, filter_icno : filter_icno, filter_name : filter_name, filter_date_start : filter_date_start, filter_date_end : filter_date_end, filter_status : filter_status },
 		dataType: 'json',
 		cache: false,
 		success: function(response) {
-			// console.log("response",response);
+			console.log("response",response);
 			$('.total_all').text(response.data.total_all);
 			$('.total_pending').text(response.data.total_pending);
 			$('.total_approved').text(response.data.total_approved);
@@ -155,6 +212,23 @@ $(function(){
 	
 	calculate_total();
 
+	$('#date_range_registration_date').datepicker({
+		format: 'dd/mm/yyyy',
+        autoclose: true,
+        todayHighlight: true,
+        // endDate: '+0d',
+		toggleActive: true,
+        todayHighlight: true
+
+	}).on('changeDate', function(e) {
+        // `e` here contains the extra attributes
+    });
+
+	var last_week = new Date();
+	last_week.setDate(last_week.getDate() - 30);
+    $('#filter_date_start').datepicker("setDate", last_week);
+    $('#filter_date_end').datepicker("setDate", new Date());
+
 	$('#datatable_custom').DataTable({
 	    "processing": true, 
 	    "serverSide": true, 
@@ -163,7 +237,12 @@ $(function(){
 	        "type": "POST",
 	        data: function (d) {
 				d.filter_major = ''; // $('#filter_major').val();
-				d.filter_status = ''; // $('#filter_status').val();
+				d.filter_registration_no = $('#filter_registration_no').val();
+				d.filter_icno = $('#filter_icno').val();
+				d.filter_name = $('#filter_name').val();
+				d.filter_date_start = $('#filter_date_start').val();
+				d.filter_date_end = $('#filter_date_end').val();
+				d.filter_status = $('#filter_status').val();
 	        },
 	    },
 		"pageLength": 100,
@@ -181,11 +260,12 @@ $(function(){
 	        $('.tooltips').tooltip();
 	        $('table.table.table-hover.dataTable.no-footer,.dataTables_scrollHeadInner').css("min-width", "100%");
 	        $(window).trigger('resize'); 
+	        calculate_total();
 	    },
 	    createdRow: function( row, data, dataIndex ) {
-	    	$( row ).find('td:eq(0),td:eq(1),td:eq(6),td:eq(7),td:eq(8)').addClass('text-center');
+	    	$( row ).find('td:eq(0),td:eq(1),td:eq(2),td:eq(3),td:eq(7),td:eq(8)').addClass('text-center');
 	    },
-	    order: [[ 6, "DESC" ]]
+	    order: [[ 7, "DESC" ]]
 	});
 
 	var arr_cb_val = [];
@@ -238,6 +318,32 @@ $(function(){
         var ids = $(this).attr('ids');
 
         location.href = "<?=site_url('admin/registration');?>/"+ids;
+    });
+
+    // when click button search
+    $('#btn_search').on('click',function(e){
+
+        $('#selected_id').val('');
+
+        e.preventDefault();
+        $('#datatable_custom').DataTable().draw();
+        calculate_total();
+    });
+
+    // when click button reset
+    $('#btn_reset').on('click',function(e){
+
+		$('#filter_registration_no').val('');
+        $('#filter_icno').val('');
+        $('#filter_name').val('');
+	    $('#filter_date_start').datepicker("setDate", last_week);
+	    $('#filter_date_end').datepicker("setDate", new Date());
+        $('#filter_status').val('').trigger('change');
+        $('#selected_id').val('');
+
+        e.preventDefault();
+        $('#datatable_custom').DataTable().draw();  
+        calculate_total(); 
     });
 
 });	

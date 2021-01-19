@@ -3,6 +3,7 @@
 	$required_field = '';
 
 	$registration_id_enc = '';
+	$registration_no = '';
 	$registration_agreement = ''; 
 	$registration_payment = ''; 
 	$payment_receipt = '';
@@ -39,6 +40,8 @@
 
 	$attachment_payment_receipt = '';
 
+	$approval_remarks = '';
+
 	$readonly = 'readonly';
 	$disabled = 'disabled';
 
@@ -48,6 +51,7 @@
 	{
 		$registration_id = $registration_data->registration_id;
 		$registration_id_enc = encryptor('encrypt',$registration_id);
+		$registration_no = $registration_data->registration_no; 
 		$registration_agreement = $registration_data->registration_agreement; 
 		$registration_payment = $registration_data->registration_payment; 
 		$payment_receipt = $registration_data->payment_receipt;
@@ -74,13 +78,15 @@
 		$office_city = $registration_data->office_city;
 		$office_state = $registration_data->office_state;
 		$member_status = $registration_data->member_status; 
-		$registration_status_label = $registration_data->registration_status_label;
+		$registration_status_label = strtoupper($registration_data->registration_status_label);
 		$registration_status_color = $registration_data->registration_status_color;
 
 		$registration_agreement_checked = ( $registration_agreement == 1 ) ? 'checked' : '';
 		$registration_payment_checked = ( $registration_payment == 1 ) ? 'checked' : '';
 
 		$attachment_payment_receipt = $registration_data->attachment_preview['payment_receipt'];
+
+		$approval_remarks = $registration_data->approval_remarks;
 
 		$readonly = 'readonly';
 		$disabled = 'disabled';
@@ -97,7 +103,8 @@
 	        <h4 class="page-title float-left">Registration Details</h4>
 
 	        <ol class="breadcrumb float-right">
-	            <li class="breadcrumb-item"><a href="<?=site_url('admin/registration');?>">Registration</a></li>
+	            <li class="breadcrumb-item"><a href="javascript:void(0)">Registration</a></li>
+	            <li class="breadcrumb-item"><a href="<?=site_url('admin/registration');?>">List</a></li>
 	            <li class="breadcrumb-item active">Details</li>
 	        </ol>
 
@@ -111,12 +118,9 @@
     <div class="col-12">
         <div class="card-box">
 			<form id="form_registration" name="form_registration" action="" method="post" enctype="multipart/form-data">
-	            <h4 class="header-title m-b-15 m-t-0">Manage Registration <span class="label label-warning">x</span></h4>
+	            <h4 class="header-title m-b-15 m-t-0">Manage Registration</h4>
 
-	            <div class="m-b-10" style="text-align:end;">
-		            <button type="button" class="btn btn-success waves-effect w-md waves-light btn-approval" id="btn_approve" value="2">Approve</button>
-		            <button type="button" class="btn btn-danger waves-effect w-md waves-light btn-approval" id="btn_reject" value="3">Reject</button>
-		        </div>
+	            <h5 class="m-b-15">REG NO: <strong><?=$registration_no;?></strong> <span class="label label-<?=$registration_status_color;?>"><?=$registration_status_label;?></span></h5>
 
 	            <ul class="nav nav-tabs tabs-bordered nav-justified">
                     <li class="nav-item">
@@ -182,7 +186,7 @@
 				            <div class="col-md-12">
 				                <div class="form-group">
 				                    <label for="home_address">Address - Home <?=STARFIELD;?></label>
-				                    <textarea name="home_address" id="home_address" rows="5" style="resize: none; margin-top: 0px; margin-bottom: 0px; height: 100px; " parsley-trigger="change" <?=$required_field;?> <?=$readonly;?> placeholder="Address - Home" class="form-control input-sm turn_uppercase"><?=$home_address;?></textarea>
+				                    <textarea name="home_address" id="home_address" rows="5" style="resize: none; margin-top: 0px; margin-bottom: 0px; height: 100px;" parsley-trigger="change" <?=$required_field;?> <?=$readonly;?> placeholder="Address - Home" class="form-control input-sm turn_uppercase"><?=$home_address;?></textarea>
 				                </div>
 				            </div>
 
@@ -231,7 +235,7 @@
 							<div class="col-md-12">    
 				                <div class="form-group">
 				                    <label for="office_address">Address - Office</label>
-				                    <textarea name="office_address" id="office_address" rows="5" style="resize: none; margin-top: 0px; margin-bottom: 0px; height: 100px; " parsley-trigger="change" <?=$readonly;?> placeholder="Address - Office" class="form-control input-sm turn_uppercase"><?=$office_address;?></textarea>
+				                    <textarea name="office_address" id="office_address" rows="5" style="resize: none; margin-top: 0px; margin-bottom: 0px; height: 100px;" parsley-trigger="change" <?=$readonly;?> placeholder="Address - Office" class="form-control input-sm turn_uppercase"><?=$office_address;?></textarea>
 				                </div>
 				            </div>
 
@@ -326,6 +330,29 @@
                     <!-- end tab_5 -->
                 </div>
 
+                <hr />
+
+                <h4 class="header-title m-b-15 m-t-0">For Approval</h4>
+
+	            <div class="m-b-10">
+	                <div class="form-group">
+	                    <label for="approval_remarks">Remarks</label>
+	                    <textarea name="approval_remarks" id="approval_remarks" rows="5" style="resize: none; margin-top: 0px; margin-bottom: 0px; height: 100px; parsley-trigger="change" <?=( in_array($registration_status, array(2,3)) ? 'readonly' : '' );?> placeholder="Remarks" class="form-control input-sm"><?=$approval_remarks;?></textarea>
+	                </div>
+	            </div>
+	            
+	            <?php 
+	            	if ( in_array($registration_status, array('', 1)) )
+	            	{
+	            ?>
+		            <div class="m-b-10" style="text-align:end;">
+			            <button type="button" class="btn btn-success waves-effect w-md waves-light btn-approval" id="btn_approve" value="2">Approve</button>
+			            <button type="button" class="btn btn-danger waves-effect w-md waves-light btn-approval" id="btn_reject" value="3">Reject</button>
+			        </div>
+	            <?php		
+	            	}
+	            ?>
+
 				<input type="hidden" id="ids_1" name="ids_1" value="<?=$registration_id_enc;?>" />
 				<input type="hidden" id="ids_2" name="ids_2" value="<?=$member_id_enc;?>" />
 
@@ -397,46 +424,86 @@ $(function(){
 		var ids_1 = $('#ids_1').val();
 		var ids_2 = $('#ids_2').val();
 		var status = $(this).val(); 
+		var approval_remarks = $('#approval_remarks').val();
 
-		var dataString = "ids_1="+ids_1+"&ids_2="+ids_2+"&status="+status;
+		var dataString = "ids_1="+ids_1+"&ids_2="+ids_2+"&status="+status+"&approval_remarks="+approval_remarks;
 
-		$.ajax({
-			type: "POST",
-			url: "<?php echo site_url('admin/registration/approval')?>",
-			data: dataString,
-			dataType: 'json',
-			cache: false,
-			success: function(response) {
-				// console.log("response",response);
+		if ( status == 2 )
+		{
+			status_label = 'Approve';
+		}
+		else
+		{
+			status_label = 'Reject';
+		}
 
-                var msg_title = "Approval Fail!";
-                var msg_content = response.msg;
-                var msg_status = "error";
-
-                if ( response.rst == 1 )
-                {
-                	msg_title = "Approval Success!";
-                	msg_content = response.msg;
-                	msg_status = "success";
-                }
-                else
-                {
-                	msg_title = "Approval Fail!";
-                	msg_content = response.msg;
-                	msg_status = "error";
-                }
-
-            	swal({
-					title: msg_title,
-					html: msg_content,
-					type: msg_status,
+		if ( status == 3 && approval_remarks == '' )
+		{
+			swal({
+					title: '',
+					html: 'Please key your remarks regarding the rejection!',
+					type: 'warning',
 					allowOutsideClick: false
 				}).then(function () {
 				});
-			},
-			complete: function(){
-			}
-		});
+		}
+		else
+		{
+			swal({
+		        title: 'Are you sure to '+status_label+'?',
+		        text: 'Once Approve or Reject you cannot undo this step, proceed anyway?',
+		        type: 'warning',
+		        showCancelButton: true,
+		        confirmButtonColor: '#4cbe71',
+		        cancelButtonColor: '#d33',
+		        confirmButtonText: 'Yes!',
+		        cancelButtonText: 'No, cancel!',
+		        confirmButtonClass: 'btn btn-success',
+		        cancelButtonClass: 'btn btn-danger m-l-10',
+		        allowOutsideClick: false
+	        
+	    	}).then(function() {
+
+				$.ajax({
+					type: "POST",
+					url: "<?php echo site_url('admin/registration/approval')?>",
+					data: dataString,
+					dataType: 'json',
+					cache: false,
+					success: function(response) {
+						// console.log("response",response);
+
+		                var msg_title = "Approval Fail!";
+		                var msg_content = response.msg;
+		                var msg_status = "error";
+
+		                if ( response.rst == 1 )
+		                {
+		                	msg_title = "Approval Success!";
+		                	msg_content = response.msg;
+		                	msg_status = "success";
+		                }
+		                else
+		                {
+		                	msg_title = "Approval Fail!";
+		                	msg_content = response.msg;
+		                	msg_status = "error";
+		                }
+
+		            	swal({
+							title: msg_title,
+							html: msg_content,
+							type: msg_status,
+							allowOutsideClick: false
+						}).then(function () {
+							location.reload();
+						});
+					},
+					complete: function(){
+					}
+				});
+			});
+	    }
 	});
 
 });	
