@@ -60,9 +60,12 @@ $route['registration-form'] = 'Registration';
 $route['registration-upload'] = 'Registration/upload_file';
 $route['registration-submit'] = 'Registration/save';
 $route['registration-complete/(:any)'] = 'Registration/registration_complete/$1';
-
 $route['registration/qualification/details'] = 'Registration/qualification_details';
 $route['registration/organization/details'] = 'Registration/organization_details';
+
+
+$route['registration-status'] = 'Registration/check_status';
+$route['registration-status/get'] = 'Registration/get_status';
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<< END PUBLIC USER SITE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 

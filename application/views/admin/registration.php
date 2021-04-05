@@ -72,7 +72,7 @@
 		        ?>
 		        <div class="div_form_filter">
 			        <form id="form_filter" name="form_filter" action="" method="post" enctype="multipart/form-data">
-								
+
 						<div class="row m-t-20">
 							<div class="col-sm-4">
 								<div class="form-group">
@@ -80,20 +80,6 @@
 									<input type="text" class="form-control input-sm" id="filter_registration_no" name="filter_registration_no" placeholder="Registration No" value="" />
 								</div>
 							</div>
-							<div class="col-sm-4">
-								<div class="form-group">
-									<label>IC No</label>
-									<input type="text" class="form-control input-sm" id="filter_icno" name="filter_icno" placeholder="IC No" value="" />
-								</div>
-							</div>
-							<div class="col-sm-4">
-								<div class="form-group">
-									<label>Name</label>
-									<input type="text" class="form-control input-sm turn_uppercase" id="filter_name" name="filter_name" placeholder="Name" value="" />
-								</div>
-							</div>
-						</div>
-						<div class="row">
 							<div class="col-sm-4">
 								<div class="form-group">
 									<label>Registration Date</label>
@@ -129,6 +115,27 @@
 							</div>
 						</div>
 
+						<div class="row">
+							<div class="col-sm-4">
+								<div class="form-group">
+									<label>Membership No</label>
+									<input type="text" class="form-control input-sm" id="filter_membership_no" name="filter_membership_no" placeholder="Membership No" value="" />
+								</div>
+							</div>
+							<div class="col-sm-4">
+								<div class="form-group">
+									<label>IC No</label>
+									<input type="text" class="form-control input-sm" id="filter_icno" name="filter_icno" placeholder="IC No" value="" />
+								</div>
+							</div>
+							<div class="col-sm-4">
+								<div class="form-group">
+									<label>Name</label>
+									<input type="text" class="form-control input-sm turn_uppercase" id="filter_name" name="filter_name" placeholder="Name" value="" />
+								</div>
+							</div>
+						</div>
+
 						<div class="text-left">
 							<button type="submit" name="btn_search" id="btn_search" class="btn btn-primary btn-bordered btn-sm"><i class="fa fa-search"></i> Search</button>
 							<button type="button" name="btn_reset" id="btn_reset" class="btn btn-inverse btn-bordered btn-sm"><i class="fa fa-eraser"></i> Reset</button>
@@ -153,9 +160,9 @@
 			                    <th class="text-center no-sort">Action</th>
 			                    <th class="text-center no-sort">No</th>
 			                    <th class="text-center">Reg. No</th>
+			                    <th class="text-center">Membership No</th>
 			                    <th class="text-center">Name</th>
 			                    <th class="text-center">IC No</th>
-			                    <th class="text-center">HP No</th>
 			                    <th class="text-center">Register Date</th>
 			                    <th class="text-center">Status</th>
 			                </tr>
@@ -179,11 +186,12 @@
 function calculate_total()
 {
 	var filter_registration_no = $('#filter_registration_no').val();
-	var filter_icno = $('#filter_icno').val();
-	var filter_name = $('#filter_name').val();
 	var filter_date_start = $('#filter_date_start').val();
 	var filter_date_end = $('#filter_date_end').val();
 	var filter_status = $('#filter_status').val();
+	var filter_membership_no = $('#filter_membership_no').val();
+	var filter_icno = $('#filter_icno').val();
+	var filter_name = $('#filter_name').val();
 
 	$('.total_all').text('0');
 	$('.total_pending').text('0');
@@ -193,7 +201,15 @@ function calculate_total()
 	$.ajax({
 		type: "POST",
 		url: "<?php echo site_url('admin/registration/total')?>",
-		data: { filter_registration_no : filter_registration_no, filter_icno : filter_icno, filter_name : filter_name, filter_date_start : filter_date_start, filter_date_end : filter_date_end, filter_status : filter_status },
+		data: 	{ 
+					filter_registration_no : filter_registration_no,
+					filter_date_start : filter_date_start,
+					filter_date_end : filter_date_end,
+					filter_status : filter_status,
+					filter_membership_no : filter_membership_no,
+					filter_icno : filter_icno,
+					filter_name : filter_name,
+				},
 		dataType: 'json',
 		cache: false,
 		success: function(response) {
@@ -238,11 +254,12 @@ $(function(){
 	        data: function (d) {
 				d.filter_major = ''; // $('#filter_major').val();
 				d.filter_registration_no = $('#filter_registration_no').val();
-				d.filter_icno = $('#filter_icno').val();
-				d.filter_name = $('#filter_name').val();
 				d.filter_date_start = $('#filter_date_start').val();
 				d.filter_date_end = $('#filter_date_end').val();
 				d.filter_status = $('#filter_status').val();
+				d.filter_membership_no = $('#filter_membership_no').val();
+				d.filter_icno = $('#filter_icno').val();
+				d.filter_name = $('#filter_name').val();
 	        },
 	    },
 		"pageLength": 100,
@@ -263,7 +280,7 @@ $(function(){
 	        calculate_total();
 	    },
 	    createdRow: function( row, data, dataIndex ) {
-	    	$( row ).find('td:eq(0),td:eq(1),td:eq(2),td:eq(3),td:eq(7),td:eq(8)').addClass('text-center');
+	    	$( row ).find('td:eq(0),td:eq(1),td:eq(2),td:eq(3),td:eq(4),td:eq(7),td:eq(8)').addClass('text-center');
 	    },
 	    order: [[ 7, "DESC" ]]
 	});
@@ -334,11 +351,12 @@ $(function(){
     $('#btn_reset').on('click',function(e){
 
 		$('#filter_registration_no').val('');
-        $('#filter_icno').val('');
-        $('#filter_name').val('');
 	    $('#filter_date_start').datepicker("setDate", last_week);
 	    $('#filter_date_end').datepicker("setDate", new Date());
         $('#filter_status').val('').trigger('change');
+		$('#filter_membership_no').val('');
+        $('#filter_icno').val('');
+        $('#filter_name').val('');
         $('#selected_id').val('');
 
         e.preventDefault();

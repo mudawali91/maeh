@@ -12,6 +12,7 @@
 	$registration_date = '';
 
 	$member_id_enc = '';
+	$membership_no = '';
 	$name = '';
 	$icno = '';
 	$contactno_mobile = '';
@@ -61,6 +62,7 @@
 
 		$member_id = $registration_data->member_id;
 		$member_id_enc = encryptor('encrypt',$member_id);
+		$membership_no = $registration_data->membership_no;
 		$name = $registration_data->name;
 		$icno = $registration_data->icno;
 		$contactno_mobile = $registration_data->contactno_mobile;
@@ -118,9 +120,16 @@
     <div class="col-12">
         <div class="card-box">
 			<form id="form_registration" name="form_registration" action="" method="post" enctype="multipart/form-data">
-	            <h4 class="header-title m-b-15 m-t-0">Manage Registration</h4>
+				<div class="d-flex">
+					<h4 class="header-title m-b-15 m-t-0 text-dark">Manage Registration</h4>
+					<div class="ml-auto">
+						<a href="<?=site_url('admin/registration');?>" role="button" class="btn btn-sm btn-primary btn-bordered waves-effect waves-light"> <i class="fa fa-arrow-left m-r-5"></i> <span>Back</span> </a>
+					</div>
+				</div>
 
 	            <h5 class="m-b-15">REG NO: <strong><?=$registration_no;?></strong> <span class="label label-<?=$registration_status_color;?>"><?=$registration_status_label;?></span></h5>
+
+	            <h5 class="m-b-15">MEMBERSHIP NO: <strong><?=$membership_no;?></strong></h5>
 
 	            <ul class="nav nav-tabs tabs-bordered nav-justified">
                     <li class="nav-item">
@@ -346,8 +355,8 @@
 	            	{
 	            ?>
 		            <div class="m-b-10" style="text-align:end;">
-			            <button type="button" class="btn btn-success waves-effect w-md waves-light btn-approval" id="btn_approve" value="2">Approve</button>
-			            <button type="button" class="btn btn-danger waves-effect w-md waves-light btn-approval" id="btn_reject" value="3">Reject</button>
+			            <button type="button" class="btn btn-sm btn-success waves-effect w-md waves-light btn-approval" id="btn_approve" value="2">Approve</button>
+			            <button type="button" class="btn btn-sm btn-danger waves-effect w-md waves-light btn-approval" id="btn_reject" value="3">Reject</button>
 			        </div>
 	            <?php		
 	            	}

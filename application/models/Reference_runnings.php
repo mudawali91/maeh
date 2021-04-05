@@ -183,17 +183,25 @@ class Reference_runnings extends CI_Model
 	{
 		$reference_no = '';
 
-        // year 4 digits
-        $reference_no .= $year;
-
         if ( $module == 'REGISTRATION' )
         {
+	        // year 4 digits
+	        $reference_no .= $year;
         	$reference_no .= '1';
         }
 
         // get current running no
         $running_no = $this->get_running_no($module, $year);
-        $reference_no .= str_pad($running_no, 5, '0', STR_PAD_LEFT);
+
+        if ( $module == 'MEMBERSHIP' )
+        {
+        	$reference_no .= 'MAEH';
+        	$reference_no .= str_pad($running_no, 7, '0', STR_PAD_LEFT);
+        }
+        else
+        {
+        	$reference_no .= str_pad($running_no, 5, '0', STR_PAD_LEFT);
+        }
 
         return $reference_no;
 	}

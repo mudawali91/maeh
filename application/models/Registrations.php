@@ -60,7 +60,7 @@ class Registrations extends CI_Model
 	function read_join_3($filter=array())
 	{
 		$db = $this->db;
-		$db->select('a.id as registration_id, a.registration_no, a.registration_status, b.id AS member_id');
+		$db->select('a.id as registration_id, a.registration_no, a.registration_status, b.id AS member_id, b.membership_no, b.name, b.icno');
 		$db->from($this->table.' a');
 		$db->join('members b', 'b.registration_id = a.id AND b.id = a.member_id','INNER');
 		$db->where('a.active',1);
@@ -70,7 +70,15 @@ class Registrations extends CI_Model
 		{
 			foreach ( $filter as $key => $val )
 			{
-				$db->where($key,$val);
+				if ( strtolower($key) == 'icno_no_dash' )
+				{
+					$key = 'b.icno';
+					$db->where("REPLACE(".$key.", '-', '') = '".$val."'");
+				}
+				else
+				{
+					$db->where($key,$val);	
+				}
 			}
 		}
 
@@ -101,16 +109,6 @@ class Registrations extends CI_Model
 		    		$db->like('a.registration_no', $val, 'BOTH');
 				}
 
-				if ( strtolower($key) == 'filter_icno' && !empty($val) ) 
-				{
-		    		$db->like('b.icno', $val, 'BOTH');
-				}
-
-				if ( strtolower($key) == 'filter_name' &&  !empty($val) ) 
-				{
-		    		$db->like('b.name', $val, 'BOTH');
-				}
-
 				if ( strtolower($key) == 'filter_date_start' &&  !empty($val) )
 				{
 					$filter_date_start = str_replace('/', '-', $val);
@@ -130,6 +128,21 @@ class Registrations extends CI_Model
 				if ( strtolower($key) == 'filter_status' &&  !empty($val) ) 
 				{
 		    		$db->where('a.registration_status', $val);
+				}
+
+				if ( strtolower($key) == 'filter_membership_no' && !empty($val) ) 
+				{
+		    		$db->like('b.membership_no', $val, 'BOTH');
+				}
+
+				if ( strtolower($key) == 'filter_icno' && !empty($val) ) 
+				{
+		    		$db->like('b.icno', $val, 'BOTH');
+				}
+
+				if ( strtolower($key) == 'filter_name' &&  !empty($val) ) 
+				{
+		    		$db->like('b.name', $val, 'BOTH');
 				}
 			}
 		}
@@ -206,22 +219,23 @@ class Registrations extends CI_Model
 
 	// ======================= DATATABLE SERVER SIDE PROCESSING =========================
 
-    var $column_order = array(null, null, null, 'a.registration_no', 'b.name', 'b.icno', 'b.contactno_mobile', 'registration_date', 'registration_status_label'); // field display in table column
-    var $column_search = array('a.registration_no', 'b.name', 'b.icno', 'b.contactno_mobile', 'registration_status_label'); // field to search in datatable  
+    var $column_order = array(null, null, null, 'a.registration_no', 'b.membership_no', 'b.name', 'b.icno', 'registration_date', 'registration_status_label'); // field display in table column
+    var $column_search = array('a.registration_no', 'b.membership_no', 'b.name', 'b.icno', 'registration_status_label'); // field to search in datatable  
     var $order = array('a.created' => 'DESC'); // default order 
 
     private function _get_datatables_query()
     {
     	$filter_major = $this->input->post('filter_major');
     	$filter_registration_no = $this->input->post('filter_registration_no');
-    	$filter_icno = $this->input->post('filter_icno');
-    	$filter_name = $this->input->post('filter_name');
     	$filter_date_start = $this->input->post('filter_date_start');
     	$filter_date_end = $this->input->post('filter_date_end');
     	$filter_status = $this->input->post('filter_status');
+    	$filter_membership_no = $this->input->post('filter_membership_no');
+    	$filter_icno = $this->input->post('filter_icno');
+    	$filter_name = $this->input->post('filter_name');
 
     	$db = $this->db;
-    	$db->select('a.id as registration_id, a.registration_no, a.registration_status, a.created AS registration_date, b.id AS member_id, b.name, b.icno, b.contactno_mobile, b.home_address, b.home_postcode, b.home_city, b.home_state, s.status AS registration_status_label, s.bootstrap_class AS registration_status_color');
+    	$db->select('a.id as registration_id, a.registration_no, a.registration_status, a.created AS registration_date, b.id AS member_id, b.membership_no, b.name, b.icno, b.contactno_mobile, b.home_address, b.home_postcode, b.home_city, b.home_state, s.status AS registration_status_label, s.bootstrap_class AS registration_status_color');
     	$db->from($this->table.' a');
     	$db->join('members b', 'b.registration_id = a.id AND b.id = a.member_id', 'INNER');
     	$db->join('status s', 's.id = a.registration_status', 'LEFT');
@@ -236,16 +250,6 @@ class Registrations extends CI_Model
 		if ( !empty($filter_registration_no) ) 
 		{
     		$db->like('a.registration_no', $filter_registration_no, 'BOTH');
-		}
-
-		if ( !empty($filter_icno) ) 
-		{
-    		$db->like('b.icno', $filter_icno, 'BOTH');
-		}
-
-		if ( !empty($filter_name) ) 
-		{
-    		$db->like('b.name', $filter_name, 'BOTH');
 		}
 
 		if ( !empty($filter_date_start) )
@@ -267,6 +271,21 @@ class Registrations extends CI_Model
 		if ( !empty($filter_status) ) 
 		{
     		$db->where('a.registration_status', $filter_status);
+		}
+
+		if ( !empty($filter_membership_no) ) 
+		{
+    		$db->like('b.membership_no', $filter_membership_no, 'BOTH');
+		}
+
+		if ( !empty($filter_icno) ) 
+		{
+    		$db->like('b.icno', $filter_icno, 'BOTH');
+		}
+
+		if ( !empty($filter_name) ) 
+		{
+    		$db->like('b.name', $filter_name, 'BOTH');
 		}
 
 		$i = 0;

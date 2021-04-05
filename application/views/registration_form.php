@@ -41,6 +41,7 @@
     <link href="<?=base_url()?>assets/css/pages.css" rel="stylesheet" type="text/css" />
     <link href="<?=base_url()?>assets/css/menu.css" rel="stylesheet" type="text/css" />
     <link href="<?=base_url()?>assets/css/responsive.css" rel="stylesheet" type="text/css" />
+    <link href="<?=base_url()?>assets/css/style.css" rel="stylesheet" type="text/css" />
     <link href="<?=base_url()?>assets/css/loader_lain.css" rel="stylesheet" type="text/css" />
 
     <script src="<?=base_url()?>assets/js/modernizr.min.js"></script>
@@ -333,7 +334,7 @@ $(function(){
 		<!-- Top Bar -->
 	    <div class="topbar" style="background: #000000;">
 		
-			<div class="navbar navbar-custom">
+			<div class="navbar">
 				<div class="container" style="width: 100%; padding: 0;">
 					<div class="row">
 						<div class="col-md-2">
@@ -341,7 +342,7 @@ $(function(){
 							<span style="font-size:16px;"><b>MAEH</b></span>
 						</div>
 						<div class="col-md-10 text-right">
-							<button type="button" class="btn btn-sm btn-primary btn-bordered waves-effect w-md waves-light">Semakan Keahlian</button>
+							<a href="<?=site_url("registration-status");?>" role="button" class="btn btn-sm btn-primary btn-bordered waves-effect w-md waves-light"> <span>Registration Status</span> </a>
 						</div>
 					</div>
 				</div>

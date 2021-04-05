@@ -88,16 +88,18 @@
 {
 	padding: 10px 10px !important;
 }
-.bg-account-pages
-{
-	/*background: linear-gradient(to left, #4489e4, #5691c8);*/
-}
 .account-box .account-content {
-    padding: 0px 60px 10px 60px;
+    padding: 0px 30px 0px 30px;
 }
+
+/* custom sweet alert */
+.swal2-modal .swal2-title {
+    font-size: 20px;
+}
+
 </style>
 
-<body class="bg-account-pages">
+<body>
 
     <!-- Begin page wrapper -->
     <div id="wrapper">
@@ -136,32 +138,48 @@
 			        <div class="row">
 			            <div class="col-sm-12">
 
-			                <div class="wrapper-page" style="height: 0vh !important;">
+			            	<div class="card-box mb-0">
 
-								<div class="account-pages">
-									<div class="account-box" style="max-width: 600px !important;">
-										<div class="text-center account-logo-box" style="padding: 10px 0px 0px 0px !important;">
-											<h2 class="text-uppercase">
-												<?=$display_img;?>
-												<?=$display_title;?>
-											</h2>
-										</div>
-										<div class="account-content">
-											<div class="m-b-10 text-dark text-center">
-												<?=$display_message;?>
-												<a href="<?=site_url("registration-form");?>" role="button" class="btn btn-sm btn-primary btn-bordered waves-effect waves-light m-t-10"> <i class="fa fa-arrow-left m-r-5"></i> <span>Back</span> </a>
+					        	<div class="text-center">
+					        		<a href=""><img src="<?=base_url()?>img/logo-maeh-100x100.png" class="img-responsive"/></a>
+					            	<h4 class="m-t-0 text-dark">REGISTRATION STATUS</h4>
+					            	<h5 class="m-t-0 text-dark"><b>PERSATUAN KESIHATAN ENVIRONMEN MALAYSIA</b></h5>
+					            	<h5 class="m-t-0 text-dark"><b>MALAYSIAN ASSOCIATION OF ENVIRONMENTAL HEALTH (MAEH)</b></h5>
+					            	<h5 class="m-t-0 text-dark"><b>(REGISTRATION NO: PPM-001-14-14041990)</b></h5>
+					            	<p class="text-muted m-b-30 font-14">
+					            	</p>
+					            </div>
+
+				                <div class="wrapper-page" style="height: 0vh !important;">
+
+									<div class="account-pages pb-0">
+										<div class="account-box" style="max-width: 500px !important; margin: 0 auto;">
+											<div class="text-center account-logo-box" style="padding: 0 !important;">
 											</div>
-
+											<div class="account-content">
+												<div class="d-flex justify-content-center">
+													<form class="form-inline" id="form_registration_status" name="form_registration_status" action="" method="post" enctype="multipart/form-data">
+											            <div class="form-group m-r-10">
+											            	<label for="icno" class="mr-sm-2 font-bold">IC No</label>
+											                <input type="text" name="icno" id="icno" parsley-trigger="change" placeholder="IC No" class="form-control input-sm mask_nric" value="" />
+					                                    </div>
+								            			<button type="button" class="btn btn-sm btn-primary" id="btn_check_status"><i class="fa fa-spin fa-spinner spinner-status hilang"></i> Check Status</button>
+										        	</form>
+												</div>
+												<div id="status_msg" class="p-l-r-10 p-t-10 text-dark text-center">
+												</div>
+											</div>
 										</div>
+										<!-- end card-box-->
 									</div>
-									<!-- end card-box-->
-								</div>
 
-							</div>
-							<!-- end wrapper -->
+								</div>
+								<!-- end wrapper -->
+
+					        </div> <!-- end card-box -->
 
 			            </div>
-			        </div>
+			        </div> <!-- end row -->
 
 		        </div> 
                 <!-- End container -->
@@ -187,6 +205,67 @@
 <script src="<?=base_url()?>assets/js/jquery.app.js"></script>
 
 <script type="text/javascript">
+
+$(function(){
+	
+	$('#btn_check_status').click(function(){
+
+		var icno = $('#icno').val();
+
+		$('#status_msg').html('');
+
+		var error_msg = '';
+
+		if ( icno == '' || icno == undefined )
+		{
+			error_msg = 'Please key in your IC No!';
+
+			swal({
+					title: error_msg,
+					html: '',
+					type: 'warning',
+					allowOutsideClick: false
+				}).then(function () {
+				});
+		}
+		else
+		{
+			$(this).find('.spinner-status').removeClass('hilang');
+
+			$.ajax({
+				type: "POST",
+				url: "<?php echo site_url('registration-status/get')?>",
+				data: { icno : icno },
+				dataType: 'json',
+				cache: false,
+				success: function(response) {
+					// console.log("response",response);
+
+					$('#btn_check_status > i').addClass('hilang');
+
+					if ( response.rst == -1 )
+					{
+						swal({
+							title: response.msg, // 'Ops! Something wrong with your input data',
+							html: '',
+							type: 'warning',
+							allowOutsideClick: false
+						}).then(function () {
+						});
+					}
+					else
+					{
+						$('#status_msg').html(response.msg);
+					}
+				},
+				complete: function(){
+				}
+			});
+		}
+	});
+
+});	
+
 </script>
 
 </body>

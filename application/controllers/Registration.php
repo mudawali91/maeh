@@ -232,8 +232,16 @@ class Registration extends MY_Controller {
 
 				if ( $rst_registration > 0 )
 				{
+					$membership_no = NULL;
+
+					if ( $submit_form == 1 )
+					{
+						$membership_no = $this->Reference_runnings->generate_reference_no('MEMBERSHIP', NULL);
+					}
+
 					// update member
 					$data_update_member = array(
+													'membership_no'		=> $membership_no,
 													'name' 				=> $name,
 													'icno' 				=> $icno,
 													'contactno_mobile' 	=> $contactno_mobile,
@@ -656,6 +664,149 @@ class Registration extends MY_Controller {
     	$this->load->view('registration_complete', $data);
 	}
 
+	public function check_status()
+	{
+		$data = array();
+		
+    	$this->load->view('registration_status', $data);
+	}
+
+	public function get_status()
+	{
+		$icno = $this->input->post('icno');
+		$icno = str_replace('-', '', $icno);
+
+		$error = 0;
+		$error_msg = array();
+
+		// validate input
+		if ( empty($icno) )
+		{
+			$error_msg[] = 'IC No is empty';
+		}
+
+		if ( count($error_msg) > 0 )
+		{
+			$error = -1;
+		} 
+
+		$rst = 0;
+		$data = array();
+		$msg = '';
+
+		if ( $error == 0 )
+		{
+			$filter = array('icno_no_dash' => $icno);
+
+			$registration_data = $this->Registrations->read_join_3($filter);
+
+			if ( is_object($registration_data) && !empty($registration_data) )
+			{
+				$member_id = $registration_data->member_id;
+				$registration_status = $registration_data->registration_status;
+				$membership_no = $registration_data->membership_no;
+				$name = $registration_data->name;
+				$icno = $registration_data->icno;
+
+				if ( $member_id > 0 && $registration_status > 0 )
+				{
+					$rst = 1;
+
+					$status_list = $this->Status->list_all();
+					$status_arr = array();
+
+					if ( is_array($status_list) && count($status_list) > 0 )
+					{
+						foreach ($status_list as $key => $val) 
+						{
+							$status_arr[$val->id] = array(
+															'status' 			=> $val->status,
+															'bootstrap_class' 	=> $val->bootstrap_class,
+															'color_code' 		=> $val->color_code
+														); 
+						}
+					}
+
+		        	$registration_status_label = $status_arr[$registration_status]['status'];
+		        	$registration_status_color = $status_arr[$registration_status]['bootstrap_class'];
+		            $registration_status_display = '<span class="label label-'.$registration_status_color.' font-14">'.$registration_status_label.'</span>';
+		            $registration_status_color_code = $status_arr[$registration_status]['color_code'];
+
+		            $msg = '<div class="col-md-12 text-center p-0 p-t-10 m-b-0" style="border: 2px '.$registration_status_color_code.' dashed; border-radius: 4px;">';
+					$msg .= '<p class="m-b-5 font-bold">Status: '.$registration_status_display.'</p>';
+					$msg .= '<p class="m-b-5 font-bold">Name: '.$name.'</p>';
+					$msg .= '<p class="m-b-5 font-bold">IC NO: '.$icno.'</p>';
+
+					// status approved
+					if ( $registration_status == 2 )
+					{
+						$msg .= '<p class="m-b-5 font-bold">Membership No: '.$membership_no.'</p>';
+					}
+
+					$msg .= '</div>';
+				}
+				else
+				{
+					$msg .= '<p class="text-danger m-t-5 font-16 font-bold">IC No Not Found!</p>';
+					$msg .= '<p class="font-13 m-b-5"> 
+								<span style="font-size: 14px;">
+									We\'re sorry. Your registration data does not exist in our database.
+								<span><br />
+							</p>';
+				}	
+			}
+			else
+			{
+				$msg .= '<p class="text-danger m-t-5 font-16 font-bold">IC No Not Found!</p>';
+				$msg .= '<p class="font-13 m-b-5"> 
+							<span style="font-size: 14px;">
+								We\'re sorry. Your registration data does not exist in our database.
+							<span><br />
+						</p>';
+			}		
+
+
+			$msg .= '<p class="font-13 m-t-10"> 
+						<span style="font-size: 12px;">
+							If you have any enquiry, please do not hesitate to contact us
+						</span> 
+					</p>';
+
+			$msg .= '<p class="font-13 m-t-10"> 
+						<span style="font-size: 12px;">
+							<a href="mailto:admin@maeh.com.my">admin@maeh.com.my</a>
+							<br />
+							<a href="tel:+6031234567">+603 123 4567</a>
+						</span>
+					</p>';
+		}
+		else
+		{
+			$notis_msg = "Please key in your IC No!";
+
+			// $notis_msg .= "<ol style='font-size:12px; font-weight: bold; color: #f96a74; text-align: left;'>";
+					
+			// foreach ( $error_msg as $val )
+			// {
+			// 	$notis_msg .= "<li>".$val."</li>";
+			// }
+			
+			// $notis_msg .= "</ol>";
+
+			$rst = -1;
+			$data = array();
+			$msg = $notis_msg;
+		}
+
+		$output = array(
+						'rst' 	=> $rst,
+						'data' 	=> $data,
+						'msg' 	=> $msg
+						);
+
+		echo json_encode($output);
+	}
+
 	public function list_page()
 	{
 		$data = array();
@@ -715,9 +866,9 @@ class Registration extends MY_Controller {
 	            			</a>';
 	            $row[] = $no;
 	            $row[] = $field->registration_no;
+	            $row[] = $field->membership_no;
 	            $row[] = $field->name;
 	            $row[] = $field->icno;
-	            $row[] = $field->contactno_mobile;
 	            $row[] = $registration_date;
 	            $row[] = $registration_status;
 	 
@@ -743,19 +894,21 @@ class Registration extends MY_Controller {
 		$msg = '';
 
 		$filter_registration_no = $this->input->post('filter_registration_no');
-    	$filter_icno = $this->input->post('filter_icno');
-    	$filter_name = $this->input->post('filter_name');
     	$filter_date_start = $this->input->post('filter_date_start');
     	$filter_date_end = $this->input->post('filter_date_end');
     	$filter_status = $this->input->post('filter_status');
+    	$filter_membership_no = $this->input->post('filter_membership_no');
+    	$filter_icno = $this->input->post('filter_icno');
+    	$filter_name = $this->input->post('filter_name');
 
 		$filter = array(
 						'filter_registration_no'	=> $filter_registration_no,
-						'filter_icno' 				=> $filter_icno,
-						'filter_name' 				=> $filter_name,
 						'filter_date_start' 		=> $filter_date_start,
 						'filter_date_end' 			=> $filter_date_end,
 						'filter_status'				=> $filter_status,
+						'filter_membership_no'		=> $filter_membership_no,
+						'filter_icno' 				=> $filter_icno,
+						'filter_name' 				=> $filter_name,
 						);
 
 		$data = $this->Registrations->read_total($filter);
