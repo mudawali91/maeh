@@ -41,9 +41,10 @@ class Registration extends MY_Controller {
 		
 		$data = array();
 		
-		$data['states'] = $this->States->list_dd(); 
-		$data['membership_type'] = array_slice($this->Memberships->membership_type, 0, 3, true); 
-		$data['qualification_categories'] = $this->Qualification_categories->list_dd(); 
+		$data['states'] = $this->States->list_dd();
+		$data['membership_type'] = array_slice($this->Memberships->membership_type, 0, 3, true);
+		$data['membership_fee'] = $this->Memberships->membership_fee;
+		$data['qualification_categories'] = $this->Qualification_categories->list_dd();
 
 		// $this->data = $data;
 		// $this->middle = 'registration_form';
@@ -766,7 +767,19 @@ class Registration extends MY_Controller {
 	            $id = $field->registration_id;
 	            $id_enc = encryptor('encrypt',$id);
 
+	            $member_id = $field->member_id;
+	            $member_id_enc = encryptor('encrypt',$member_id);
+
 	            $registration_status = $field->registration_status;
+
+	            $membership_certificate_url = '';
+
+	            if ( !empty($member_id) && $registration_status == 2 ) {
+	            	// only status Approved can view certificate
+		            $membership_certificate_url = '<a href="'.site_url('registration/certification/'.$member_id_enc).'" class="table-action-btn btn_view_cert" title="View Membership Certificate" target="_blank">
+				            				<i class="fa fa-address-card-o fa-lg text-warning"></i>
+				            			</a>&nbsp;';
+	            }
 
 	        	$registration_status_label = $field->registration_status_label;
 	        	$registration_status_color = $field->registration_status_color;
@@ -783,9 +796,10 @@ class Registration extends MY_Controller {
 		                        <input type="checkbox" class="cb_single" id="cb_single_'.$id_enc.'" name="cb_single" value="'.$id_enc.'">
                                 <label></label>
 		                    </div>';
-	            $row[] = 	'<a href="javascript:void(0)" class="table-action-btn btn_view" ids="'.$id_enc.'" title="View Data">
+	            $row[] = 	$membership_certificate_url.
+	            			'<a href="javascript:void(0)" class="table-action-btn btn_view" ids="'.$id_enc.'" title="View Data">
 	            				<i class="fa fa-eye fa-lg text-info"></i>
-	            			</a>
+	            			</a>&nbsp;
 	            			<a href="javascript:void(0)" class="table-action-btn btn_delete" ids="'.$id_enc.'" title="Delete Data">
 	            				<i class="fa fa-trash fa-lg text-danger"></i>
 	            			</a>';
@@ -906,7 +920,7 @@ class Registration extends MY_Controller {
 												'date_to'			=> getDateTime(), 
 												'created' 			=> getDateTime(),
 												'updated' 			=> getDateTime(),
-												'active'			=> 0,
+												'active'			=> 1,
 											);
 			
 			$membership_id = $this->Memberships->create_data($data_create_membership);
@@ -932,6 +946,8 @@ class Registration extends MY_Controller {
         $data = array();
 		$view = 'error_404';
 
+		$data['membership_fee'] = $this->Memberships->membership_fee;
+
 		if ( in_array($this->session->curr_user_type_id, $this->uac) )
 		{
 			$selected_id_enc = $ids;
@@ -944,6 +960,10 @@ class Registration extends MY_Controller {
 			$data['registration_data'] = $this->Registrations->read_join_2($selected_id);
 			$data['registration_data']->dob = display_datetime('DATE', $data['registration_data']->dob);
 			$data['registration_data']->registration_date = display_datetime('DATETIME2', $data['registration_data']->registration_date);
+
+	        $data['registration_data']->membership_status_label = ( $data['registration_data']->membership_status ? ' <span class="label label-'.$this->Memberships->status_color[$data['registration_data']->membership_status].'">'.$this->Memberships->status_list[$data['registration_data']->membership_status].'</span>' : '' );;
+	        ;
+	        $membership_status_arr = $this->Memberships->status_list; 
 
 			$attachment_name = $data['registration_data']->payment_receipt;
 
@@ -1052,7 +1072,92 @@ class Registration extends MY_Controller {
     	echo $output;
 	}
 
-	public function get_certification()
+	public function get_certification($ids)
 	{
+		$member_id_enc = $ids;
+	    $member_id = encryptor('decrypt', $member_id_enc);
+
+	    $data = $this->Members->read_join($member_id);
+
+	    if ( empty($data) ) {
+	    	show_404();
+	    }
+
+	    $registration_date = display_datetime('DATETIME5', $data->registration_date);
+	    $registration_year = date('Y', strtotime($data->registration_date));
+	    $membership_type = ( isset($this->Memberships->membership_type[$data->membership_type_id]) ? $this->Memberships->membership_type[$data->membership_type_id] : '');
+	    $membership_date_started = display_datetime('DATE', $data->date_from);
+	    $membership_date_expired = display_datetime('DATE', $data->date_to);
+
+	    $this->load->library('CertificatePDF');
+
+		$pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
+		$pdf->SetPrintHeader(false);
+		$pdf->SetPrintFooter(false);
+		$pdf->SetMargins(0, 0, 0);
+		$pdf->SetAutoPageBreak(false, 0);
+
+		$pageWidth = $pdf->getPageWidth();
+
+		$pdf->AddPage();
+
+		$fontArial = TCPDF_FONTS::addTTFfont(FCPATH . 'assets/fonts/Arial.ttf', 'TrueTypeUnicode', '', 96);
+		$fontArialB = TCPDF_FONTS::addTTFfont(FCPATH . 'assets/fonts/Arial Bold.ttf', 'TrueTypeUnicode', '', 96);
+		$fontArialRMTB = TCPDF_FONTS::addTTFfont(FCPATH . 'assets/fonts/Arial Rounded MT Bold.ttf', 'TrueTypeUnicode', '', 96);
+
+		// Set image as background (full A4 page)
+		$pdf->Image(FCPATH.'img/certificate_templates/membership_certificate.jpg', 
+			0, 0, //position x and y
+			297, 210, // width and height
+			'', '', '', 
+			false, // not a mask
+			300, // DPI
+			'', 
+			false, false, 0);
+
+		// No Siri
+		$pdf->SetFont($fontArial, '', 18);
+		$pdf->SetTextColor(255, 0, 0);
+		$pdf->SetXY(20, 6.6);
+		$pdf->Cell(0, 10, 'No. Siri : 0000/2025', 0, 1);
+
+		// Member Since
+		$pdf->SetFont($fontArialB, '', 18);
+		$pdf->SetTextColor(0, 0, 0);
+		$pdf->SetXY(85, 118.6);
+		$pdf->Cell(0, 10, $registration_year, 0, 1);
+
+		// Membership Type
+		$pdf->SetFont($fontArialB, '', 18);
+		$pdf->SetTextColor(0, 0, 0);
+		$pdf->SetXY(180, 118.6);
+		$pdf->Cell(0, 10, $membership_type, 0, 1);
+
+		// Membership No
+		$pdf->SetFont($fontArialB, '', 18);
+		$pdf->SetTextColor(0, 0, 0);
+		$pdf->SetXY(80, 130);
+		$pdf->Cell(0, 10, $data->membership_no, 0, 1);
+
+		// Membership Expiry Date
+		$pdf->SetFont($fontArialB, '', 18);
+		$pdf->SetTextColor(0, 0, 0);
+		$pdf->SetXY(189, 130);
+		$pdf->Cell(0, 10, $membership_date_expired, 0, 1);
+
+		// Registration Date
+		$pdf->SetFont($fontArialB, '', 16);
+		$pdf->SetTextColor(0, 0, 0);
+		// center the text according to page width
+		$pdf->writeHTMLCell($pageWidth, 0, 0, 181, $registration_date, 0, 1, 0, true, 'C');
+
+		// Name
+		$pdf->SetFont($fontArialRMTB, '', 24);
+		$pdf->SetTextColor(102, 51, 0);
+		// center the text according to page width
+		$pdf->writeHTMLCell($pageWidth, 0, 0, 87, ucwords(strtolower($data->name)).'<br />'.$data->icno, 0, 1, 0, true, 'C');
+
+		$pdf->Output(str_replace('-', '', $data->icno).'_MAEH-Membership-Certificate.pdf', 'I');
+
 	}
 }

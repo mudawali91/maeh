@@ -724,7 +724,7 @@ $(function(){
 											<div class="col-md-12 cb-div">
 									            <div class="checkbox checkbox-success" style="margin-left:-3px;">
 								                    <input type="checkbox" class="custom-control-input" id="registration_payment" name="registration_payment" value="1" />
-								                    <label class="custom-control-label font-13" for="registration_payment">I enclosed herewith payment receipt for RM39.00 being the payment of yearly subscription RM36.00 and entrance fee RM3.00.<br />For students, yearly subscription RM10.00 and entrance fee RM3.00.</label>
+								                    <label class="custom-control-label font-13" for="registration_payment">I enclosed herewith payment receipt for <?=( isset($membership_fee) ? MAIN_CURRENCY.$membership_fee['total_registration'][1] : '' );?> being the payment of yearly subscription <?=( isset($membership_fee) ? MAIN_CURRENCY.$membership_fee['registration'][1] : '' );?> and entrance fee <?=( isset($membership_fee) ? MAIN_CURRENCY.$membership_fee['renewal_yearly'][1] : '' );?>.<br />For students, yearly subscription <?=( isset($membership_fee) ? MAIN_CURRENCY.$membership_fee['registration'][1] : '' );?> and entrance fee <?=( isset($membership_fee) ? MAIN_CURRENCY.$membership_fee['renewal_yearly'][2] : '' );?>.</label>
 								                </div>
 								                <?php if ( isset($validation_error->registration_payment) ) { ?>
 							                    <div class="form-control-feedback" id="registration_payment-error"><?=$validation_error->registration_payment;?></div>

@@ -90,3 +90,7 @@ defined('_SMTP_PWD')			OR define('_SMTP_PWD', 'abc123!@#');
 defined('_SMTP_PORT')			OR define('_SMTP_PORT', '587');
 
 defined('ADMIN_PATH')			OR define('ADMIN_PATH', 'admin/');
+defined('ADMIN_PATH')			OR define('ADMIN_PATH', 'admin/');
+defined('ADMIN_PATH')			OR define('ADMIN_PATH', 'admin/');
+
+defined('MAIN_CURRENCY')		OR define('MAIN_CURRENCY', 'RM');

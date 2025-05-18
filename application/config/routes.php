@@ -63,7 +63,7 @@ $route['registration-submit'] = 'Registration/save';
 $route['registration-complete/(:any)'] = 'Registration/registration_complete/$1';
 $route['registration/qualification/details'] = 'Registration/qualification_details';
 $route['registration/organization/details'] = 'Registration/organization_details';
-$route['registration/certification'] = 'Registration/get_certification';
+$route['registration/certification/(:any)'] = 'Registration/get_certification/$1';
 
 
 $route['registration-status'] = 'Registration/check_status';

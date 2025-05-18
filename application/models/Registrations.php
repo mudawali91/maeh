@@ -45,9 +45,10 @@ class Registrations extends CI_Model
 	function read_join_2($id)
 	{
 		$db = $this->db;
-		$db->select('a.id as registration_id, a.registration_no, a.registration_agreement, a.registration_payment, a.payment_receipt, a.payment_status, a.registration_status, a.approval_remarks, a.created AS registration_date, b.id AS member_id, b.*, s.status AS registration_status_label, s.bootstrap_class AS registration_status_color');
+		$db->select('a.id as registration_id, a.registration_no, a.registration_agreement, a.registration_payment, a.payment_receipt, a.payment_status, a.registration_status, a.approval_remarks, a.created AS registration_date, b.id AS member_id, b.*, c.membership_no, c.membership_status, s.status AS registration_status_label, s.bootstrap_class AS registration_status_color');
 		$db->from($this->table.' a');
 		$db->join('members b', 'b.registration_id = a.id AND b.id = a.member_id','INNER');
+    	$db->join('memberships c', 'c.member_id = b.id AND c.membership_status = 1', 'LEFT');
     	$db->join('status s', 's.id = a.registration_status', 'LEFT');
 		$db->where('a.'.$this->primary_key,$id);
 		$db->where('a.active',1);
@@ -60,9 +61,10 @@ class Registrations extends CI_Model
 	function read_join_3($filter=array())
 	{
 		$db = $this->db;
-		$db->select('a.id as registration_id, a.registration_no, a.registration_status, b.id AS member_id, b.membership_no, b.name, b.icno');
+		$db->select('a.id as registration_id, a.registration_no, a.registration_status, b.id AS member_id, c.membership_no, b.name, b.icno');
 		$db->from($this->table.' a');
 		$db->join('members b', 'b.registration_id = a.id AND b.id = a.member_id','INNER');
+    	$db->join('memberships c', 'c.member_id = b.id AND c.membership_status = 1', 'LEFT');
 		$db->where('a.active',1);
 		$db->where('b.active',1);
 
@@ -97,6 +99,7 @@ class Registrations extends CI_Model
 					');
 		$db->from($this->table.' a');
 		$db->join('members b', 'b.registration_id = a.id AND b.id = a.member_id','INNER');
+    	$db->join('memberships c', 'c.member_id = b.id AND c.membership_status = 1', 'LEFT');
 		$db->where('a.active',1);
 		$db->where('b.active',1);
 
@@ -132,7 +135,7 @@ class Registrations extends CI_Model
 
 				if ( strtolower($key) == 'filter_membership_no' && !empty($val) ) 
 				{
-		    		$db->like('b.membership_no', $val, 'BOTH');
+		    		$db->like('c.membership_no', $val, 'BOTH');
 				}
 
 				if ( strtolower($key) == 'filter_icno' && !empty($val) ) 
@@ -219,8 +222,8 @@ class Registrations extends CI_Model
 
 	// ======================= DATATABLE SERVER SIDE PROCESSING =========================
 
-    var $column_order = array(null, null, null, 'a.registration_no', 'b.membership_no', 'b.name', 'b.icno', 'registration_date', 'registration_status_label'); // field display in table column
-    var $column_search = array('a.registration_no', 'b.membership_no', 'b.name', 'b.icno', 'registration_status_label'); // field to search in datatable  
+    var $column_order = array(null, null, null, 'a.registration_no', 'c.membership_no', 'b.name', 'b.icno', 'registration_date', 'registration_status_label'); // field display in table column
+    var $column_search = array('a.registration_no', 'c.membership_no', 'b.name', 'b.icno', 'registration_status_label'); // field to search in datatable  
     var $order = array('a.created' => 'DESC'); // default order 
 
     private function _get_datatables_query()
@@ -276,7 +279,7 @@ class Registrations extends CI_Model
 
 		if ( !empty($filter_membership_no) ) 
 		{
-    		$db->like('b.membership_no', $filter_membership_no, 'BOTH');
+    		$db->like('c.membership_no', $filter_membership_no, 'BOTH');
 		}
 
 		if ( !empty($filter_icno) ) 

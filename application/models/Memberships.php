@@ -10,10 +10,55 @@ class Memberships extends CI_Model
 		3 => 'Corporate',
 		4 => 'Kehormat',
 		5 => 'Bersekutu',
+		6 => 'Lifetime'
 	];
+
+	public $membership_fee = [
+		'registration' => [
+			1 => 60.00, // Normal & others
+			2 => 10.00, // Student
+		],
+		'renewal_yearly' => [
+			1 => 5.00, // Normal & others
+			2 => 5.00, // Student
+		],
+		'total_registration' => [
+			1 => 65.00, // Normal & others
+			2 => 15.00, // Student
+		],
+	];
+
+	public $status_list = array( 1 => 'Active', 'Inactive' );
+	public $status_color = array( 1 => 'success', 'danger' );
 	
 	public function __construct()
 	{
+		$this->membership_type = [
+			1 => 'Normal',
+			2 => 'Student',
+			3 => 'Corporate',
+			4 => 'Kehormat',
+			5 => 'Bersekutu',
+			6 => 'Lifetime'
+		];
+
+		$this->membership_fee = [
+			'registration' => [
+				1 => 60.00, // Normal & others
+				2 => 10.00, // Student
+			],
+			'renewal_yearly' => [
+				1 => 5.00, // Normal & others
+				2 => 5.00, // Student
+			],
+			'total_registration' => [
+				1 => 65.00, // Normal & others
+				2 => 15.00, // Student
+			],
+		];
+
+		$this->status_list = array( 1 => 'Active', 'Inactive' );
+		$this->status_color = array( 1 => 'success', 'danger' );
 	}
 	
 	function read_data($id,$field)

@@ -137,6 +137,14 @@ function display_datetime($show_type, $datetime) {
 			$output_datetime = date('jS \of F Y', strtotime($datetime));
 		}
 		
+	} else if ( strtoupper($show_type) == 'DATETIME5' ) {
+		
+		if ( $datetime == '' || $datetime == '0000-00-00 00:00:00' ) {
+			$output_datetime = '';
+		} else {
+			$output_datetime = date('d F Y', strtotime($datetime));
+		}
+		
 	} else if ( strtoupper($show_type) == 'DATE' ) {
 		
 		if ( $datetime == '' || $datetime == '0000-00-00' ) {

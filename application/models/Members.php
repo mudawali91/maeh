@@ -28,6 +28,21 @@ class Members extends CI_Model
 		return $q;
 	}
 
+	function read_join($id)
+	{
+		$db = $this->db;
+		$db->select('a.id, a.registration_id, a.name, a.icno, b.membership_type_id, b.membership_no, b.membership_status, b.date_from, b.date_to, c.created AS registration_date');
+		$db->from($this->table.' a');
+    	$db->join('memberships b', 'b.member_id = a.id AND b.membership_status = 1', 'LEFT');
+    	$db->join('registrations c', 'c.member_id = a.id AND c.id = a.registration_id', 'INNER');
+		$db->where('a.'.$this->primary_key,$id);
+		$db->where('a.active',1);
+		$db->where('c.registration_status',2);
+		$db->limit(1);
+		$q = $db->get()->row();
+		return $q;
+	}
+
 	function list_data()
 	{
 		$db = $this->db;

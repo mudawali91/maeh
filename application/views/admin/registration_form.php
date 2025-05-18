@@ -29,7 +29,7 @@
 	$office_postcode = '';
 	$office_city = '';
 	$office_state = '';
-	$member_status = ''; 
+	$membership_status_label = ''; 
 	$created = '';
 	$updated = '';
 	$active = ''; 
@@ -79,7 +79,7 @@
 		$office_postcode = $registration_data->office_postcode;
 		$office_city = $registration_data->office_city;
 		$office_state = $registration_data->office_state;
-		$member_status = $registration_data->member_status; 
+		$membership_status_label = $registration_data->membership_status_label; 
 		$registration_status_label = strtoupper($registration_data->registration_status_label);
 		$registration_status_color = $registration_data->registration_status_color;
 
@@ -129,7 +129,7 @@
 
 	            <h5 class="m-b-15">REG NO: <strong><?=$registration_no;?></strong> <span class="label label-<?=$registration_status_color;?>"><?=$registration_status_label;?></span></h5>
 
-	            <h5 class="m-b-15">MEMBERSHIP NO: <strong><?=$membership_no;?></strong></h5>
+	            <h5 class="m-b-15">MEMBERSHIP NO: <strong><?=$membership_no;?></strong><?=$membership_status_label;?></h5>
 
 	            <ul class="nav nav-tabs tabs-bordered nav-justified">
                     <li class="nav-item">
@@ -327,7 +327,7 @@
 							<div class="col-md-12">
 					            <div class="checkbox checkbox-success" style="margin-left:18px;">
 				                    <input type="checkbox" class="custom-control-input" id="registration_payment" name="registration_payment" value="1" <?=$registration_payment_checked;?> <?=$disabled;?> />
-				                    <label class="custom-control-label font-13" for="registration_payment">I enclosed herewith payment receipt for RM39.00 being the payment of yearly subscription RM36.00 and entrance fee RM3.00.<br />For students, yearly subscription RM10.00 and entrance fee RM3.00.</label>
+				                    <label class="custom-control-label font-13" for="registration_payment">I enclosed herewith payment receipt for <?=( isset($membership_fee) ? MAIN_CURRENCY.$membership_fee['total_registration'][1] : '' );?> being the payment of yearly subscription <?=( isset($membership_fee) ? MAIN_CURRENCY.$membership_fee['registration'][1] : '' );?> and entrance fee <?=( isset($membership_fee) ? MAIN_CURRENCY.$membership_fee['renewal_yearly'][1] : '' );?>.<br />For students, yearly subscription <?=( isset($membership_fee) ? MAIN_CURRENCY.$membership_fee['registration'][1] : '' );?> and entrance fee <?=( isset($membership_fee) ? MAIN_CURRENCY.$membership_fee['renewal_yearly'][2] : '' );?>.</label>
 				                </div> 
 				            </div>
 
