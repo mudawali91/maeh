@@ -462,6 +462,7 @@ $(function(){
 													</select>
 												</div>
 											</div>
+
 											<div class="col-md-6">
 								                <div class="form-group">
 								                    <label class="form-control-label" for="name">Name <?=STARFIELD;?></label>

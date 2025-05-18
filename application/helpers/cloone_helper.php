@@ -15,6 +15,14 @@ function getDateTime()
 	return $now->format('Y-m-d H:i:s');
 }
 
+function getDateTimeModify($modifyTime='+1 year')
+{
+	$now = new DateTime();
+	$now->modify($modifyTime);
+	// $now->setTimezone(new DateTimezone('Asia/Kuala_Lumpur'));
+	return $now->format('Y-m-d H:i:s');
+}
+
 function getTodayDate()
 {
 	// return date('Y-m-d');

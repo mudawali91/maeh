@@ -888,6 +888,7 @@ class Registration extends MY_Controller {
 		$member_id_enc = $this->input->post('ids_2');
 	    $member_id = encryptor('decrypt', $member_id_enc);
 		$status = $this->input->post('status');
+		$membership_type_id = $this->input->post('membership_type_id');
 		$approval_remarks = $this->input->post('approval_remarks');
 
 		$rst = 0;
@@ -907,23 +908,29 @@ class Registration extends MY_Controller {
 
 		if ( $rst > 0 )
 		{
-			// generate membership no once registration approved
-			$membership_no = $this->Reference_runnings->generate_reference_no('MEMBERSHIP', NULL);
+			if ( $status == 2 )
+			{
+				// generate membership no once registration approved
+				$membership_no = $this->Reference_runnings->generate_reference_no('MEMBERSHIP', NULL);
 
-			// create membership
-			$data_create_membership = array(
-												'member_id' 		=> $member_id,
-												'membership_type_id'=> 4,
-												'membership_no' 	=> $membership_no,
-												'membership_status' => 1,
-												'date_from'			=> getDateTime(), 
-												'date_to'			=> getDateTime(), 
-												'created' 			=> getDateTime(),
-												'updated' 			=> getDateTime(),
-												'active'			=> 1,
-											);
-			
-			$membership_id = $this->Memberships->create_data($data_create_membership);
+				// create membership
+				$data_create_membership = array(
+													'member_id' 		=> $member_id,
+													'membership_type_id'=> $membership_type_id,
+													'membership_no' 	=> $membership_no,
+													'membership_status' => 1,
+													'date_from'			=> getDateTime(), 
+													'date_to'			=> getDateTimeModify('+1 year'), 
+													'created' 			=> getDateTime(),
+													'updated' 			=> getDateTime(),
+													'active'			=> 1,
+												);
+				
+				$membership_id = $this->Memberships->create_data($data_create_membership);
+
+				// update membership type applied by applicant
+				$this->Members->update_data($member_id, ['membership_type_id' => $membership_type_id]);
+			}
 
 			$msg = 'Registration '.$status_label.' Succesful';
 		}
@@ -946,6 +953,7 @@ class Registration extends MY_Controller {
         $data = array();
 		$view = 'error_404';
 
+		$data['membership_type'] = array_slice($this->Memberships->membership_type, 0, 3, true);
 		$data['membership_fee'] = $this->Memberships->membership_fee;
 
 		if ( in_array($this->session->curr_user_type_id, $this->uac) )
@@ -961,7 +969,8 @@ class Registration extends MY_Controller {
 			$data['registration_data']->dob = display_datetime('DATE', $data['registration_data']->dob);
 			$data['registration_data']->registration_date = display_datetime('DATETIME2', $data['registration_data']->registration_date);
 
-	        $data['registration_data']->membership_status_label = ( $data['registration_data']->membership_status ? ' <span class="label label-'.$this->Memberships->status_color[$data['registration_data']->membership_status].'">'.$this->Memberships->status_list[$data['registration_data']->membership_status].'</span>' : '' );;
+	        $data['registration_data']->membership_status_label = ( $data['registration_data']->membership_status ? ' <span class="label label-'.$this->Memberships->status_color[$data['registration_data']->membership_status].'">'.$this->Memberships->status_list[$data['registration_data']->membership_status].'</span>' : '' );
+	        $data['registration_data']->membership_type_applied = ( isset($this->Memberships->membership_type[$data['registration_data']->membership_type_id]) ? $this->Memberships->membership_type[$data['registration_data']->membership_type_id] : '');
 	        ;
 	        $membership_status_arr = $this->Memberships->status_list; 
 

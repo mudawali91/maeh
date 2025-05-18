@@ -31,7 +31,7 @@ class Members extends CI_Model
 	function read_join($id)
 	{
 		$db = $this->db;
-		$db->select('a.id, a.registration_id, a.name, a.icno, b.membership_type_id, b.membership_no, b.membership_status, b.date_from, b.date_to, c.created AS registration_date');
+		$db->select('a.id, a.registration_id, a.name, a.icno, a.membership_type_id, b.membership_no, b.membership_status, b.date_from, b.date_to, c.created AS registration_date');
 		$db->from($this->table.' a');
     	$db->join('memberships b', 'b.member_id = a.id AND b.membership_status = 1', 'LEFT');
     	$db->join('registrations c', 'c.member_id = a.id AND c.id = a.registration_id', 'INNER');

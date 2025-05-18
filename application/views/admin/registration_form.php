@@ -12,6 +12,8 @@
 	$registration_date = '';
 
 	$member_id_enc = '';
+	$membership_type_id = '';
+	$membership_type_applied = '';
 	$membership_no = '';
 	$name = '';
 	$icno = '';
@@ -43,8 +45,8 @@
 
 	$approval_remarks = '';
 
-	$readonly = 'readonly';
-	$disabled = 'disabled';
+	$readonly_after_approval = $readonly = 'readonly';
+	$disabled_after_approval = $disabled = 'disabled';
 
 	// pre($registration_data);
 
@@ -62,6 +64,8 @@
 
 		$member_id = $registration_data->member_id;
 		$member_id_enc = encryptor('encrypt',$member_id);
+		$membership_type_id = $registration_data->membership_type_id;
+		$membership_type_applied = $registration_data->membership_type_applied;
 		$membership_no = $registration_data->membership_no;
 		$name = $registration_data->name;
 		$icno = $registration_data->icno;
@@ -92,6 +96,12 @@
 
 		$readonly = 'readonly';
 		$disabled = 'disabled';
+
+		if ( $registration_status == 1 ) {
+			// Status Pending
+			$readonly_after_approval = '';
+			$disabled_after_approval = '';
+		}
 	}
 
 ?>
@@ -162,6 +172,14 @@
                     <div class="tab-pane active" id="tab_1">
 
                     	<div class="row">
+
+                    		<div class="col-md-12">
+								<div class="form-group">
+				                    <label for="membership_type">Membership Type <?=STARFIELD;?></label>
+				                     <input type="text" name="membership_type_applied" id="membership_type_applied" parsley-trigger="change" <?=$required_field;?> <?=$readonly;?> placeholder="Membership Type" class="form-control input-sm" value="<?=$membership_type_applied;?>" />
+								</div>
+							</div>
+
 	                    	<div class="col-md-6">
 				                <div class="form-group">
 				                    <label for="name">Name <?=STARFIELD;?></label>
@@ -344,9 +362,28 @@
                 <h4 class="header-title m-b-15 m-t-0">For Approval</h4>
 
 	            <div class="m-b-10">
+	            	<div class="form-group">
+					    <label class="form-control-label" for="membership_type">Membership Type <?=STARFIELD;?></label>
+					    <select class="form-control select-sm select2_field" name="membership_type_id" id="membership_type_id" <?=$disabled_after_approval;?>>
+					    	<option value="">Select Membership Type</option>
+					<?php
+					if ( is_array($membership_type) && count($membership_type) > 0 ) 
+					{
+						foreach ( $membership_type as $key => $val ) 
+						{
+							$selected = ( $key == $membership_type_id ? 'selected="selected"' : '' );
+					?>
+					    	<option value="<?=$key;?>" <?=$selected;?>><?=$val;?></option>
+					<?php
+						}
+					}
+					?>
+						</select>
+					</div>
+
 	                <div class="form-group">
-	                    <label for="approval_remarks">Remarks</label>
-	                    <textarea name="approval_remarks" id="approval_remarks" rows="5" style="resize: none; margin-top: 0px; margin-bottom: 0px; height: 100px; parsley-trigger="change" <?=( in_array($registration_status, array(2,3)) ? 'readonly' : '' );?> placeholder="Remarks" class="form-control input-sm"><?=$approval_remarks;?></textarea>
+	                    <label class="form-control-label" for="approval_remarks">Remarks</label>
+	                    <textarea name="approval_remarks" id="approval_remarks" rows="5" style="resize: none; margin-top: 0px; margin-bottom: 0px; height: 100px; parsley-trigger="change" <?=$readonly_after_approval;?> placeholder="Remarks" class="form-control input-sm"><?=$approval_remarks;?></textarea>
 	                </div>
 	            </div>
 	            
@@ -425,26 +462,95 @@ function get_organization_details()
 
 $(function(){
 	
+	$(".select2_field").select2();
+
 	get_qualification_details();
 	get_organization_details();
+
+	$("#form_registration").validate({
+		errorElement: 'div',
+	    errorPlacement: function (error, element) {
+			$(element).closest('.form-group').addClass('has-danger');
+			if (element.hasClass("select2-hidden-accessible")) {
+				element.closest(".form-group").find(".form-control-feedback").remove();
+				error.addClass('form-control-feedback');
+				error.insertAfter(element.next(".select2-container"));
+				element.next(".select2-container").addClass('form-control-danger');
+	        } else if (element.parent('.checkbox').length) {
+				element.closest(".cb-div").find(".form-control-feedback").remove();
+				error.addClass('form-control-feedback');
+		        error.insertAfter(element.parent());
+		    } else {
+				element.next(".form-control-feedback").remove();
+				error.addClass('form-control-feedback');
+				error.insertAfter(element);
+	            element.addClass('form-control-danger');
+	        }
+	    },
+	    highlight: function (element, errorClass, validClass) {
+			$(element).closest('.form-group').addClass('has-danger').removeClass('has-success');
+			if ($(element).hasClass("select2-hidden-accessible")) {
+				// $('.select2_field').select2({ containerCssClass : 'select2-container--custom-validation' });
+				$(element).next(".select2-container").find(".select2-selection").removeClass('select2-container--custom-validation').addClass('select2-container--custom-validation');
+				$(element).next(".select2-container").addClass('form-control-danger').removeClass('form-control-success');
+			} else {
+				$(element).addClass('form-control-danger').removeClass('form-control-success');
+			}
+	    },
+	    unhighlight: function (element, errorClass, validClass) {
+			$(element).closest('.form-group').addClass('has-success').removeClass('has-danger');
+			if ($(element).hasClass("select2-hidden-accessible")) {
+	    		// $('.select2_field').select2({ containerCssClass : 'select2-container--custom-validation' });
+				$(element).next(".select2-container").find(".select2-selection").removeClass('select2-container--custom-validation').addClass('select2-container--custom-validation');
+				$(element).next(".select2-container").addClass('form-control-success').removeClass('form-control-danger');
+			} else {
+				$(element).addClass('form-control-success').removeClass('form-control-danger');
+			}
+	    },
+		rules: {
+			membership_type_id: "required",
+			approval_remarks: {
+				required: false
+			}
+	    },
+	    messages: {
+			membership_type_id: "Membership Type is required",
+	    	approval_remarks: {
+	    		required: "Remarks is required"
+	    	}
+	    }
+	});
+
+    $('.select2_field').on('change', function(e) {
+	    $(this).valid();
+	});
 
 	$('.btn-approval').click(function(){
 
 		var ids_1 = $('#ids_1').val();
 		var ids_2 = $('#ids_2').val();
 		var status = $(this).val(); 
+		var membership_type_id = $('#membership_type_id').val();
 		var approval_remarks = $('#approval_remarks').val();
 
-		var dataString = "ids_1="+ids_1+"&ids_2="+ids_2+"&status="+status+"&approval_remarks="+approval_remarks;
+		var dataString = "ids_1="+ids_1+"&ids_2="+ids_2+"&status="+status+"&membership_type_id="+membership_type_id+"&approval_remarks="+approval_remarks;
+
+		$('#approval_remarks').closest('.form-group').removeClass('has-danger');
 
 		if ( status == 2 )
 		{
 			status_label = 'Approve';
+			$('#approval_remarks').rules('remove', 'required');
 		}
 		else
 		{
 			status_label = 'Reject';
+			$('#approval_remarks').rules('add', {
+				required: true
+			});
 		}
+
+		if (!$("#form_registration").valid()) { return false; }
 
 		if ( status == 3 && approval_remarks == '' )
 		{

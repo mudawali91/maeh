@@ -46,6 +46,10 @@
     <script src="<?=base_url()?>assets/js/waves.js"></script>
     <script src="<?=base_url()?>assets/js/jquery.slimscroll.js"></script>
 
+    <!-- jQuery Form Validation -->
+    <script src="<?=base_url()?>plugins/jquery-validation/js/1.19.0/jquery.validate.min.js"></script>
+    <script src="<?=base_url()?>plugins/jquery-validation/js/1.19.0/additional-methods.min.js"></script>
+
 	<!-- Required datatable js -->
     <script src="<?=base_url()?>plugins/datatables/jquery.dataTables.min.js"></script>
     <script src="<?=base_url()?>plugins/datatables/dataTables.bootstrap4.min.js"></script>
@@ -197,6 +201,26 @@
 	{
 		font-size: 12px !important;
 	}
+
+	/* start custom for validation */
+	.form-control-feedback
+	{
+		line-height: 15px !important;
+	}
+	.has-danger .select2-container .select2-selection--single.select2-container--custom-validation {
+	    border: 1px solid #d9534f !important;
+	    width: -webkit-calc(100% - -36px) !important;
+	}
+	.has-success .select2-container .select2-selection--single.select2-container--custom-validation {
+	    border: 1px solid #32c861 !important;
+	    width: -webkit-calc(100% - -36px) !important;
+	}
+	.cb-div .form-control-feedback {
+		color: #d9534f !important;
+		margin-top: -5px !important;
+		margin-bottom: 15px !important;
+	}
+	/* end custom for validation */
 
 </style>
 
