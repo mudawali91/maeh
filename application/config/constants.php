@@ -89,4 +89,4 @@ defined('_SMTP_USER')			OR define('_SMTP_USER', 'no-reply-bnh@cloone.my');
 defined('_SMTP_PWD')			OR define('_SMTP_PWD', 'abc123!@#');
 defined('_SMTP_PORT')			OR define('_SMTP_PORT', '587');
 
-define('admin_path', 'admin/', true);
+defined('ADMIN_PATH')			OR define('ADMIN_PATH', 'admin/');

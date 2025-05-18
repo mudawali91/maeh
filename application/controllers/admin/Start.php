@@ -69,7 +69,7 @@ class Start extends My_Controller
 
 		$array_session = array('curr_login_id', 'curr_user_id', 'curr_user_type_id', 'curr_user_name', 'curr_full_name', 'curr_logged_in');
 		$this->session->unset_userdata($array_session);
-		$this->load->view(admin_path.'login', $data);
+		$this->load->view(ADMIN_PATH.'login', $data);
 	}
 	
 	function logout()

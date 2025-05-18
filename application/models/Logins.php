@@ -158,6 +158,7 @@ class Logins extends CI_Model
 		$db->where('a.user_password',encryptor('encrypt',$user_password));
 		$db->where('a.active','1');
 		$db->where('b.active','1');
+		$db->where('b.status','1');
 		$db->limit(1);
 		$q = $db->get()->row();
 		// echo $this->db->last_query();

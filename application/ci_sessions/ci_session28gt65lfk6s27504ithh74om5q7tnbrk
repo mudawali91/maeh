@@ -1,0 +1,4 @@
+__ci_last_regenerate|i:1747466741;login_user|s:18:"mudastar@gmail.com";__ci_vars|a:2:{s:10:"login_user";s:3:"old";s:12:"login_result";s:3:"old";}login_result|s:274:"<div class="alert alert-danger input-sm m-l-5 m-r-5">
+		                	<button class="close" data-close="alert"></button>
+		                    <span><i class="fa fa-exclamation-triangle"></i> <strong>Invalid Username or Password.</strong> </span>
+		                </div>";

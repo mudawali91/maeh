@@ -19,6 +19,7 @@ class Registration extends MY_Controller {
 		$this->load->model('Members');
 		$this->load->model('Member_qualifications');
 		$this->load->model('Member_organizations');
+		$this->load->model('Memberships');
         $this->load->model('Reference_runnings');
 
 		/*
@@ -41,6 +42,7 @@ class Registration extends MY_Controller {
 		$data = array();
 		
 		$data['states'] = $this->States->list_dd(); 
+		$data['membership_type'] = array_slice($this->Memberships->membership_type, 0, 3, true); 
 		$data['qualification_categories'] = $this->Qualification_categories->list_dd(); 
 
 		// $this->data = $data;
@@ -50,15 +52,27 @@ class Registration extends MY_Controller {
     	$this->load->view('registration_form', $data);
 	}
 
+	public function validate_data()
+	{
+		if ( $this->input->post('process') == 'validate_icno' )
+		{
+			$find_opt = array(
+				'icno'	=> $this->input->post('icno'),
+				'active'=> 1,
+			);
+
+			$check_data = $this->Members->check_data('', $find_opt);
+			$valid = ( is_object($check_data) && !empty($check_data) ) ? false : true;
+
+			header('Content-Type: application/json');
+			echo json_encode($valid);
+		}
+	}
+
 	public function save()
 	{
-		$selected_id_enc = $this->input->post('sid'); // registration id
-		$selected_id = ( !empty($selected_id_enc) ? encryptor('decrypt',$selected_id_enc) : 0 );
-
-		$selected_id2_enc = $this->input->post('sid2'); // member id
-		$selected_id2 = ( !empty($selected_id2_enc) ? encryptor('decrypt',$selected_id2_enc) : 0 );
-
-		$submit_form = !empty($this->input->post('submit_form')) ? $this->input->post('submit_form') : 0;
+		$registration_id_enc = '';
+		$member_id_enc = '';
 
 		$registration_agreement = $this->input->post('registration_agreement');
 		$registration_payment = $this->input->post('registration_payment');
@@ -66,6 +80,7 @@ class Registration extends MY_Controller {
 		$payment_status = NULL;
 		$registration_status = NULL;
 
+		$membership_type_id = $this->input->post('membership_type_id'); // membership type applied
 		$name = $this->input->post('name');
 		$icno = $this->input->post('icno');
 		$icno = str_replace('_', '', $icno);
@@ -102,19 +117,36 @@ class Registration extends MY_Controller {
 							'active'=> 1,
 						);
 
-		$check_data = $this->Members->check_data($selected_id2, $find_opt);
+		$check_data = $this->Members->check_data(0, $find_opt);
 		$exist_data = ( is_object($check_data) && !empty($check_data) ) ? $check_data->id : '';
 
 		$error = 0;
 
-        if ( empty($exist_data) || $exist_data == 0 )
-        {
-        	$error = 0;
-        }
-        else
-        {
-        	$error = -1;
-        }
+		if ( !empty($exist_data) && $exist_data > 0 ) {
+			$msg_status = 'error';
+            $msg_title = 'Fail!';
+            $msg_content = 'IC No already exist';  
+			sweet_alert($msg_status, $msg_title, $msg_content);
+			redirect('registration-form');
+		}
+
+
+        // Validation server-side and pass back to client-side
+        // if ( $error > 0 )
+        // {
+        // 	$data = array(
+		// 		'registration' => $this->input->post()
+		// 	);
+
+		// 	if ( !empty($this->session->registration) ) 
+		// 	{
+		// 		$this->session->unset_userdata('registration');
+		// 	}
+
+		// 	$this->session->set_userdata($data);
+		// 	redirect('registration-form');
+		// 	die();
+        // }
 
         $rst = 0;
 		$data = array();
@@ -122,181 +154,88 @@ class Registration extends MY_Controller {
 
         if ( $error == 0 )
 		{
-			if ( $selected_id == 0 )
+			// Create Data
+
+			// create registration
+			$data_create_registration = array(
+												'registration_agreement' 	=> $registration_agreement,
+												'registration_payment' 		=> $registration_payment,
+												'payment_receipt'			=> $payment_receipt,
+												'payment_status' 			=> $payment_status,
+												'registration_status' 		=> $registration_status,
+												'created' 					=> getDateTime(),
+												'updated' 					=> getDateTime(),
+												'active'					=> 0,
+											);
+			
+			$registration_id = $this->Registrations->create_data($data_create_registration);
+
+			if ( $registration_id > 0 )
 			{
-				// Create Data
+				// generate registration no once submit
+				$registration_no = $this->Reference_runnings->generate_reference_no('REGISTRATION', date('Y'));
 
-				// create registration
-				$data_create_registration = array(
-													'payment_status' 			=> $payment_status,
-													'registration_status' 		=> $registration_status,
-													'created' 					=> getDateTime(),
-													'updated' 					=> getDateTime(),
-													'active'					=> 0,
+				// create membership
+				$data_create_member = array(
+												'membership_type_id'=> $membership_type_id,
+												'registration_id'	=> $registration_id,
+												'name' 				=> $name,
+												'icno' 				=> $icno,
+												'contactno_mobile' 	=> $contactno_mobile,
+												'email' 			=> $email,
+												'dob' 				=> $dob,
+												'contactno_home' 	=> $contactno_home,
+												'home_address' 		=> $home_address,
+												'home_postcode' 	=> $home_postcode,
+												'home_city' 		=> $home_city,
+												'home_state' 		=> $home_state,
+												'job_position' 		=> $job_position,
+												'contactno_office' 	=> $contactno_office,
+												'office_address' 	=> $office_address,
+												'office_postcode' 	=> $office_postcode,
+												'office_city' 		=> $office_city,
+												'office_state' 		=> $office_state,
+												'created' 			=> getDateTime(),
+												'updated' 			=> getDateTime(),
+												'active'  			=> 1,
+											);
+
+				$member_id = $this->Members->create_data($data_create_member);
+
+				$data_update_registration = array(
+													'member_id'	=> $member_id,
+													'registration_no' => $registration_no,
+													'registration_status' => 1,
+													'updated' 	=> getDateTime(),
+													'active' => 1
 												);
-				
-				$registration_id = $this->Registrations->create_data($data_create_registration);
+				$registration_update = $this->Registrations->update_data($registration_id, $data_update_registration);
 
-				if ( $registration_id > 0 )
+				$registration_id_enc = encryptor('encrypt',$registration_id);
+				$member_id_enc = encryptor('encrypt',$member_id);
+
+				if ( is_array($qualification_category) && count($qualification_category) > 0 )
 				{
-					// create registration
-					$data_create_member = array(
-													'registration_id'	=> $registration_id,
-													'name' 				=> $name,
-													'icno' 				=> $icno,
-													'contactno_mobile' 	=> $contactno_mobile,
-													'email' 			=> $email,
-													'dob' 				=> $dob,
-													'contactno_home' 	=> $contactno_home,
-													'home_address' 		=> $home_address,
-													'home_postcode' 	=> $home_postcode,
-													'home_city' 		=> $home_city,
-													'home_state' 		=> $home_state,
-													'job_position' 		=> $job_position,
-													'contactno_office' 	=> $contactno_office,
-													'office_address' 	=> $office_address,
-													'office_postcode' 	=> $office_postcode,
-													'office_city' 		=> $office_city,
-													'office_state' 		=> $office_state,
-													'member_status'		=> $member_status,
-													'created' 			=> getDateTime(),
-													'updated' 			=> getDateTime(),
-													'active'  			=> 0,
-												);
-
-					$member_id = $this->Members->create_data($data_create_member);
-
-					$data_update_registration = array(
-														'member_id'	=> $member_id, 		
-														'updated' 	=> getDateTime(),
-													);
-					$registration_update = $this->Registrations->update_data($registration_id, $data_update_registration);
-
-					$selected_id_enc = $registration_id_enc = encryptor('encrypt',$registration_id);
-					$selected_id2_enc = $member_id_enc = encryptor('encrypt',$member_id);
-
-					if ( $submit_form == 1 && $member_id > 0 )
-					{
-						if ( is_array($qualification_category) && count($qualification_category) > 0 )
-						{
-							// add qualifications
-							$rst_add_qualifications = $this->save_qualifications($member_id, $qualification_category, $qualification_title, $qualification_year, $qualification_institution);
-						}
-
-						if ( is_array($organization_name) && count($organization_name) > 0 )
-						{
-							// add organizations
-							$rst_add_organizations = $this->save_organizations($member_id, $organization_name, $organization_post);
-						}
-					}
-
-					$rst 	= 1;
-					$data 	= array('sid' => $registration_id_enc, 'sid2' => $member_id_enc);
-					$msg 	= 'Registration Successful!';	
+					// add qualifications
+					$rst_add_qualifications = $this->save_qualifications($member_id, $qualification_category, $qualification_title, $qualification_year, $qualification_institution);
 				}
-				else
+
+				if ( is_array($organization_name) && count($organization_name) > 0 )
 				{
-					$rst 	= 0;
-					$data 	= array();
-					$msg 	= 'Registration Fail!';	
+					// add organizations
+					$rst_add_organizations = $this->save_organizations($member_id, $organization_name, $organization_post);
 				}
+
+				$rst 	= 1;
+				$data 	= array('sid' => $registration_id_enc, 'sid2' => $member_id_enc);
+				$msg 	= 'Registration Successful!';	
 			}
 			else
 			{
-				$set_active = ( $submit_form == 1 ) ? 1 : 0;
-				$set_member_status = ( $submit_form == 1 ) ? 1 : NULL; 
-				$set_registration_status = ( $submit_form == 1 ) ? 1 : NULL;
-
-				$registration_no = NULL;
-
-				if ( $submit_form == 1 )
-				{
-					// generate registration no once submit
-					$registration_no = $this->Reference_runnings->generate_reference_no('REGISTRATION', date('Y'));
-				}
-
-				// update registration
-				$data_update_registration = array(
-													'registration_no'			=> $registration_no,
-													'payment_status' 			=> $payment_status,
-													'registration_status' 		=> $set_registration_status,
-													'updated' 					=> getDateTime(),
-													'active'					=> $set_active,
-												);
-
-				$data_update_registration['registration_agreement'] = $registration_agreement;
-				$data_update_registration['registration_payment'] 	= $registration_payment;
-				$data_update_registration['payment_receipt'] 		= $payment_receipt;
-				
-				$rst_registration = $this->Registrations->update_data($selected_id, $data_update_registration);
-
-				if ( $rst_registration > 0 )
-				{
-					$membership_no = NULL;
-
-					if ( $submit_form == 1 )
-					{
-						$membership_no = $this->Reference_runnings->generate_reference_no('MEMBERSHIP', NULL);
-					}
-
-					// update member
-					$data_update_member = array(
-													'membership_no'		=> $membership_no,
-													'name' 				=> $name,
-													'icno' 				=> $icno,
-													'contactno_mobile' 	=> $contactno_mobile,
-													'email' 			=> $email,
-													'dob' 				=> $dob,
-													'contactno_home' 	=> $contactno_home,
-													'home_address' 		=> $home_address,
-													'home_postcode' 	=> $home_postcode,
-													'home_city' 		=> $home_city,
-													'home_state' 		=> $home_state,
-													'job_position' 		=> $job_position,
-													'contactno_office' 	=> $contactno_office,
-													'office_address' 	=> $office_address,
-													'office_postcode' 	=> $office_postcode,
-													'office_city' 		=> $office_city,
-													'office_state' 		=> $office_state,
-													'member_status'		=> $set_member_status,
-													'updated' 			=> getDateTime(),
-													'active'			=> $set_active,
-												);
-
-					$rst_member = $this->Members->update_data($selected_id2, $data_update_member);
-
-					if ( $submit_form == 1 && $rst_member > 0 )
-					{
-						if ( is_array($qualification_category) && count($qualification_category) > 0 )
-						{
-							// add qualifications
-							$rst_add_qualifications = $this->save_qualifications($selected_id2, $qualification_category, $qualification_title, $qualification_year, $qualification_institution);
-						}
-
-						if ( is_array($organization_name) && count($organization_name) > 0 )
-						{
-							// add organizations
-							$rst_add_organizations = $this->save_organizations($selected_id2, $organization_name, $organization_post);
-						}
-					}
-
-					$rst 	= 1;
-					$data 	= array('sid' => $selected_id_enc, 'sid2' => $selected_id2_enc);
-					$msg 	= 'Registration Successful!';	
-				}
-				else
-				{
-					$rst 	= 0;
-					$data 	= array();
-					$msg 	= 'Registration Fail!';	
-				}
+				$rst 	= 0;
+				$data 	= array();
+				$msg 	= 'Registration Fail!';	
 			}
-		}
-		else if ( $error == -1 )
-		{
-			$rst 	= -1;
-			$data 	= array();
-			$msg	= 'NRIC No already exist';	
 		}
 		else
 		{
@@ -305,21 +244,7 @@ class Registration extends MY_Controller {
 			$msg	= 'Registration Fail!';	
 		}
 
-		if ( $submit_form == 1 )
-		{
-			redirect('registration-complete/'.$selected_id_enc);
-		}
-		else
-		{
-			$output = array(
-							'rst' 	=> $rst,
-							'data' 	=> $data,
-							'msg' 	=> $msg
-							);
-
-			// output in JSON format 
-	        echo json_encode($output);
-		}
+		redirect('registration-complete/'.$registration_id_enc);
 	}
 
 	function save_qualifications($member_id, $qualification_category, $qualification_title, $qualification_year, $qualification_institution)
@@ -857,7 +782,7 @@ class Registration extends MY_Controller {
 	            $row[] = '<div class="checkbox checkbox-single">
 		                        <input type="checkbox" class="cb_single" id="cb_single_'.$id_enc.'" name="cb_single" value="'.$id_enc.'">
                                 <label></label>
-		                    </label>';
+		                    </div>';
 	            $row[] = 	'<a href="javascript:void(0)" class="table-action-btn btn_view" ids="'.$id_enc.'" title="View Data">
 	            				<i class="fa fa-eye fa-lg text-info"></i>
 	            			</a>
@@ -968,6 +893,24 @@ class Registration extends MY_Controller {
 
 		if ( $rst > 0 )
 		{
+			// generate membership no once registration approved
+			$membership_no = $this->Reference_runnings->generate_reference_no('MEMBERSHIP', NULL);
+
+			// create membership
+			$data_create_membership = array(
+												'member_id' 		=> $member_id,
+												'membership_type_id'=> 4,
+												'membership_no' 	=> $membership_no,
+												'membership_status' => 1,
+												'date_from'			=> getDateTime(), 
+												'date_to'			=> getDateTime(), 
+												'created' 			=> getDateTime(),
+												'updated' 			=> getDateTime(),
+												'active'			=> 0,
+											);
+			
+			$membership_id = $this->Memberships->create_data($data_create_membership);
+
 			$msg = 'Registration '.$status_label.' Succesful';
 		}
 		else
@@ -1082,7 +1025,7 @@ class Registration extends MY_Controller {
 		$member_id_enc = $this->input->post('ids_2');
 	    $member_id = encryptor('decrypt', $member_id_enc);
 
-		$filter_member_qualification = array(); //array('a.member_id' => $member_id);
+		$filter_member_qualification = array('member_id' => $member_id);
 		$organization_data = $this->Member_organizations->list_data($filter_member_qualification);
 
 		$output = '';
@@ -1107,5 +1050,9 @@ class Registration extends MY_Controller {
     	}
 
     	echo $output;
+	}
+
+	public function get_certification()
+	{
 	}
 }

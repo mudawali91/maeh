@@ -19,7 +19,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 | Please see the user guide for complete details:
 |
-|	https://codeigniter.com/user_guide/general/routing.html
+|	https://codeigniter.com/userguide3/general/routing.html
 |
 | -------------------------------------------------------------------------
 | RESERVED ROUTES
@@ -58,10 +58,12 @@ $route['translate_uri_dashes'] = FALSE;
 
 $route['registration-form'] = 'Registration';
 $route['registration-upload'] = 'Registration/upload_file';
+$route['registration-validate'] = 'Registration/validate_data';
 $route['registration-submit'] = 'Registration/save';
 $route['registration-complete/(:any)'] = 'Registration/registration_complete/$1';
 $route['registration/qualification/details'] = 'Registration/qualification_details';
 $route['registration/organization/details'] = 'Registration/organization_details';
+$route['registration/certification'] = 'Registration/get_certification';
 
 
 $route['registration-status'] = 'Registration/check_status';
@@ -73,12 +75,12 @@ $route['registration-status/get'] = 'Registration/get_status';
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ADMIN SITE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 /*----------  LOGIN  ----------*/
-$route['admin'] = admin_path.'Start/login';
-$route['admin/login'] = admin_path.'Start/login_submit';
-$route['admin/logout'] = admin_path.'Start/logout';
-$route['admin/forgot-password'] = admin_path.'Start/forgot_password';
+$route['admin'] = ADMIN_PATH.'Start/login';
+$route['admin/login'] = ADMIN_PATH.'Start/login_submit';
+$route['admin/logout'] = ADMIN_PATH.'Start/logout';
+$route['admin/forgot-password'] = ADMIN_PATH.'Start/forgot_password';
 
-$route['admin/dashboard'] = admin_path.'Start/index';
+$route['admin/dashboard'] = ADMIN_PATH.'Start/index';
 $route['admin/registration'] = 'Registration/list_page';
 $route['admin/registration/list'] = 'Registration/list_data';
 $route['admin/registration/total'] = 'Registration/total';
@@ -88,8 +90,9 @@ $route['admin/registration/(:any)'] = 'Registration/details/$1';
 
 // SETTINGS
 
+$route['admin/setting/user'] = ADMIN_PATH.'User/index';
+$route['admin/setting/user/list'] = ADMIN_PATH.'User/list_data';
+
 $route['qualification-category-list-dd'] = 'Qualification_category/list_dd';
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<< END ADMIN SITE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-

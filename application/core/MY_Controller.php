@@ -11,10 +11,10 @@ class MY_Controller extends CI_Controller
     {
         parent::__construct();
 		
-		define("DEFAULT_SENDER_EMAIL", "noreply@senheng.com.my", true);
-		define("DEFAULT_SENDER_NAME", "noreply@senheng.com.my", true);
-		define("STARFIELD", "<span class=\"text-danger\">*</span>", true);
-		define("PREFIX_MOBILE_TELNO", "+60", true);
+		define("DEFAULT_SENDER_EMAIL", "noreply@senheng.com.my");
+		define("DEFAULT_SENDER_NAME", "noreply@senheng.com.my");
+		define("STARFIELD", "<span class=\"text-danger\">*</span>");
+		define("PREFIX_MOBILE_TELNO", "+60");
 		$this->load->model('Status');
     }
 

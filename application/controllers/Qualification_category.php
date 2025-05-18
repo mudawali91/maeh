@@ -23,8 +23,6 @@ class Qualification_category extends MY_Controller {
 	{
 		$data = array();
 		$output = '';
-
-		$usertype_list = $this->user_type;
 		
 		$qc_lists = $this->Qualification_categories->list_dd();
 

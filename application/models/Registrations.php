@@ -235,9 +235,10 @@ class Registrations extends CI_Model
     	$filter_name = $this->input->post('filter_name');
 
     	$db = $this->db;
-    	$db->select('a.id as registration_id, a.registration_no, a.registration_status, a.created AS registration_date, b.id AS member_id, b.membership_no, b.name, b.icno, b.contactno_mobile, b.home_address, b.home_postcode, b.home_city, b.home_state, s.status AS registration_status_label, s.bootstrap_class AS registration_status_color');
+    	$db->select('a.id as registration_id, a.registration_no, a.registration_status, a.created AS registration_date, b.id AS member_id, b.name, b.icno, b.contactno_mobile, b.home_address, b.home_postcode, b.home_city, b.home_state, c.membership_no, s.status AS registration_status_label, s.bootstrap_class AS registration_status_color');
     	$db->from($this->table.' a');
     	$db->join('members b', 'b.registration_id = a.id AND b.id = a.member_id', 'INNER');
+    	$db->join('memberships c', 'c.member_id = b.id AND c.membership_status = 1', 'LEFT');
     	$db->join('status s', 's.id = a.registration_status', 'LEFT');
     	$db->where('a.active',1);
     	$db->where('b.active',1);

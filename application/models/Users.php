@@ -3,12 +3,16 @@ class Users extends CI_Model
 {
 	public $table = 'users';
 	public $primary_key = 'id';
-	
+
+	public $user_type = array( 1 => 'Superadmin', 'Admin' );
+
 	public $status_list = array( 1 => 'Active', 'Inactive' );
 	public $status_color = array( 1 => 'success', 'danger' );
 
 	public function __construct()
 	{
+		$this->user_type = array( 1 => 'Superadmin', 'Admin' );
+
 		$this->status_list = array( 1 => 'Active', 'Inactive' );
 		$this->status_color = array( 1 => 'success', 'danger' );
 	}
@@ -110,14 +114,13 @@ class Users extends CI_Model
 
 	// ======================= DATATABLE SERVER SIDE PROCESSING =========================
 
-    var $column_order = array(null, 'a.full_name', 'a.email', 'b.last_login', 'a.status', null, null); //field yang ada di table
-    var $column_search = array('a.full_name', 'a.email', 'b.last_login', 'a.status'); //field yang diizin untuk pencarian 
+    var $column_order = array(null, null, null, 'a.user_type_id', 'a.full_name', 'a.email', 'a.mobile_no', 'b.last_login', 'a.status'); //field yang ada di table
+    var $column_search = array('a.user_type_id', 'a.full_name', 'a.email', 'a.mobile_no', 'b.last_login', 'a.status'); //field yang diizin untuk pencarian 
     var $order = array('UPPER(a.full_name)' => 'ASC'); // default order 
 
     private function _get_datatables_query()
     {
     	$curr_user_id = $this->session->userdata('curr_user_id');
-    	$filter_major = $this->input->post('filter_major');
     	$filter_name = $this->input->post('filter_name');
     	$filter_user_type = $this->input->post('filter_user_type');
     	$filter_status = $this->input->post('filter_status');
@@ -127,16 +130,12 @@ class Users extends CI_Model
 						GROUP BY `user_id`)';
 
     	$db = $this->db;
-    	$db->select('a.id, a.full_name, a.email, a.status, b.last_login');
+    	$db->select('a.id, a.user_type_id, a.full_name, a.email, a.mobile_no, a.status, b.last_login');
     	$db->from($this->table.' a');
     	$db->join($get_login.' b', 'b.user_id = a.id', 'INNER');
     	$db->where('a.active', '1');
     	$db->where('a.user_type_id != ', '1'); // not output super admin
     	$db->where('a.id != ', $curr_user_id); // not output current login user
-
-    	if ( !empty($filter_major) ) 
-		{
-		}
 
 		if ( !empty($filter_name) ) 
 		{

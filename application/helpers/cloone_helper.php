@@ -101,7 +101,7 @@ function date_range_weekly($today_date)
 	return $output;
 }
 
-function display_datetime($show_type='DATETIME', $datetime) {
+function display_datetime($show_type, $datetime) {
 	
 	$output_datetime = '';
 	
@@ -182,7 +182,7 @@ function display_datetime($show_type='DATETIME', $datetime) {
 	return $output_datetime;
 }
 
-function display_number_format($show_type='INTEGER', $number) {
+function display_number_format($show_type, $number) {
 	
 	if ( strtoupper($show_type) == 'INTEGER' ) {
 		$output_number = number_format($number);
@@ -331,7 +331,7 @@ function fo_short($msg,$msg_type = "success",$msg_title = '')
 	echo $js_notis;
 }
 
-function check_success($type=2,$msg_name,$msg,$location='',$types='success')
+function check_success($type,$msg_name,$msg,$location='',$types='success')
 {
 	// $types = ($typee == 'success' ? array("1"=>"success","2"=>"alert alert-success") : array("1"=>"red-thunderbird","2"=>"alert alert-danger") );
 	fo($msg_name,$msg,'',$types);
@@ -346,7 +346,7 @@ function check_success($type=2,$msg_name,$msg,$location='',$types='success')
 	
 }
 
-function sweet_alert($type='success',$header_msg,$small_msg='',$imageUrl='',$imageHeight='',$animation='false')
+function sweet_alert($type='success',$header_msg='',$small_msg='',$imageUrl='',$imageHeight='',$animation='false')
 {
 	$js_html = '
 	<script>

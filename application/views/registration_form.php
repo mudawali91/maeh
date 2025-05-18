@@ -46,13 +46,17 @@
 
     <script src="<?=base_url()?>assets/js/modernizr.min.js"></script>
 
-    <!-- jQuery  -->
+    <!-- jQuery -->
     <script src="<?=base_url()?>assets/js/jquery.min.js"></script>
     <script src="<?=base_url()?>assets/js/tether.min.js"></script><!-- Tether for Bootstrap -->
     <script src="<?=base_url()?>assets/js/bootstrap.min.js"></script>
     <script src="<?=base_url()?>assets/js/metisMenu.min.js"></script>
     <script src="<?=base_url()?>assets/js/waves.js"></script>
     <script src="<?=base_url()?>assets/js/jquery.slimscroll.js"></script>
+
+    <!-- jQuery Form Validation -->
+    <script src="<?=base_url()?>plugins/jquery-validation/js/1.19.0/jquery.validate.min.js"></script>
+    <script src="<?=base_url()?>plugins/jquery-validation/js/1.19.0/additional-methods.min.js"></script>
 
     <!-- Required datatable js -->
 	<script src="<?=base_url()?>plugins/datatables/jquery.dataTables.min.js"></script>
@@ -76,6 +80,7 @@
 	<!-- Select 2 (search Inside Dropdown List) -->
     <link href="<?=base_url()?>plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
 	<script src="<?=base_url()?>plugins/select2/js/select2.min.js" type="text/javascript"></script>
+	<!-- <script src="<?=base_url()?>plugins/select2/js/select2.full.min.js" type="text/javascript"></script> -->
 
 	<!-- Sweet-Alert  -->
 	<script src="<?=base_url()?>plugins/sweet-alert2/sweetalert2.min.js"></script>
@@ -170,21 +175,21 @@ $(function(){
 	    event.stopPropagation();
   	});
 
-	var validation_error_exist = '';
+	// var validation_error_exist = '';
 
-	if ( validation_error_exist != "" )
-	{
-		$("#area_error_message").show();
+	// if ( validation_error_exist != "" )
+	// {
+	// 	$("#area_error_message").show();
 
-		// focus to this area if got error
-	 	$('html, body').animate({
-	        scrollTop: $("#area_error_message").offset().top
-	    }, 1000);
-	}
-	else
-	{
-		$("#area_error_message").hide();
-	}
+	// 	// focus to this area if got error
+	//  	$('html, body').animate({
+	//         scrollTop: $("#area_error_message").offset().top
+	//     }, 1000);
+	// }
+	// else
+	// {
+	// 	$("#area_error_message").hide();
+	// }
 
 });
 
@@ -320,6 +325,25 @@ $(function(){
 {
 	font-size: 12px !important;
 }
+/* start custom for validation */
+.form-control-feedback
+{
+	line-height: 15px !important;
+}
+.has-danger .select2-container .select2-selection--single.select2-container--custom-validation {
+    border: 1px solid #d9534f !important;
+    width: -webkit-calc(100% - -36px) !important;
+}
+.has-success .select2-container .select2-selection--single.select2-container--custom-validation {
+    border: 1px solid #32c861 !important;
+    width: -webkit-calc(100% - -36px) !important;
+}
+.cb-div .form-control-feedback {
+	color: #d9534f !important;
+	margin-top: -5px !important;
+	margin-bottom: 15px !important;
+}
+/* end custom for validation */
 
 </style>
 
@@ -356,7 +380,7 @@ $(function(){
         <!-- ============================================================== -->
 
     	<div class="content-page" style="margin-top: 50px;">
-                
+            <?php flash_output('notis'); ?>    
             <!-- Start content -->
             <div class="content col-md-10">
                 <!-- Start container -->
@@ -390,17 +414,24 @@ $(function(){
 					  				</div>
 					   				<div class="panel-body">
 						            	<ul style="margin-bottom: 0 !important;">
-						            		<li class="font-12">Malaysian 18 years old and above</li>
-						            		<li class="font-12">Stay in Malaysia at least 10 Years</li>
+						            		<li class="font-13">Malaysian 18 years old and above.</li>
+						            		<li class="font-13">Stay in Malaysia at least 10 years.</li>
 						            	</ul>
 							        </div>    
 					       		</div>
-<!-- 
+								<?php 
+								/* 
 					       		<div id="area_error_message" class="panel panel-danger">
 					  				<div class="panel-heading"><h5 style="color:#000000 !important;"><?=(isset($validation_notis_title) ? $validation_notis_title : '');?></h5></div>
 					  				<div class="panel-body"><?=(isset($validation_notis_msg) ? $validation_notis_msg : '');?></div>
 					  			</div>
- -->
+					  			*/ 
+					  			?>
+								<p class="text-info m-b-10 font-11">
+									<i class="fa fa-info"></i> <em>Prepare your information before key-in the registration details.</em>
+									<br />
+									<i class="fa fa-info"></i> <em>Please ensure that you have already made the payment for the registration fee, as you will be required to upload the payment receipt later.</em>
+								</p>
 								<p class="text-danger m-b-10 font-13">
 									<em>(*) Compulsory Field</em>
 								</p>
@@ -412,60 +443,85 @@ $(function(){
 										<legend>Personal Details</legend>
 										<div class="row">
 
+											<div class="col-md-12">
+												<div class="form-group">
+								                    <label class="form-control-label" for="membership_type">Membership Type <?=STARFIELD;?></label>
+		                                            <select class="form-control select-sm select2_field" name="membership_type_id" id="membership_type_id">
+		                                            	<option value="">Select Membership Type</option>
+												<?php
+												if ( is_array($membership_type) && count($membership_type) > 0 ) 
+												{
+													foreach ( $membership_type as $key => $val ) 
+													{
+		                                        ?>
+		                                            	<option value="<?=$key;?>"><?=$val;?></option>
+												<?php
+													}
+												}
+												?>
+													</select>
+												</div>
+											</div>
 											<div class="col-md-6">
 								                <div class="form-group">
-								                    <label for="name">Name <?=STARFIELD;?></label>
+								                    <label class="form-control-label" for="name">Name <?=STARFIELD;?></label>
 								                    <input type="text" name="name" id="name" parsley-trigger="change" <?=$required_field;?> placeholder="Name" class="form-control input-sm turn_uppercase" value="" />
+								                    <?php if ( isset($validation_error->name) ) { ?>
+								                    <div class="form-control-feedback" id="name-error"><?=$validation_error->name;?></div>
+								                    <?php } ?>
 								                </div>
 								                <div class="form-group">
-								                    <label for="icno">IC No <?=STARFIELD;?></label>
+								                    <label class="form-control-label" for="icno">IC No <?=STARFIELD;?></label>
 								                    <input type="text" name="icno" id="icno" parsley-trigger="change" <?=$required_field;?> placeholder="IC No" class="form-control input-sm mask_nric" value="" />
+								                    <?php if ( isset($validation_error->icno) ) { ?>
+								                    <div class="form-control-feedback" id="icno-error"><?=$validation_error->icno;?></div>
+								                    <?php } ?>
 								                </div> 
 								                <div class="form-group">
-								                    <label for="contactno_mobile">HP No <?=STARFIELD;?></label>
+								                    <label class="form-control-label" for="contactno_mobile">HP No <?=STARFIELD;?></label>
 								                    <input type="text" name="contactno_mobile" id="contactno_mobile" parsley-trigger="change" <?=$required_field;?> placeholder="HP No" class="form-control input-sm mask_phone" value="" />
 								                </div>
 								            </div>
 
 								            <div class="col-md-6">
 								               <div class="form-group">
-								                    <label for="email">Email Address</label>
-								                    <input type="text" name="email" id="email" parsley-trigger="change" placeholder="Email Address" class="form-control input-sm" value="" />
+								                    <label class="form-control-label" for="email">Email Address <?=STARFIELD;?></label>
+								                    <input type="text" name="email" id="email" parsley-trigger="change" <?=$required_field;?> placeholder="Email Address" class="form-control input-sm" value="" />
 								                </div>
 								                <div class="form-group">
-								                    <label for="dob">Date of Birth <?=STARFIELD;?></label>
+								                    <label class="form-control-label" for="dob">Date of Birth <?=STARFIELD;?></label>
 								                	<input type="text" name="dob" id="datepicker-dob" parsley-trigger="change" <?=$required_field;?> placeholder="dd/mm/yyyy" class="form-control input-sm" value="" />
 								                </div>       
 								                <div class="form-group">
-								                    <label for="contactno_home">Home Tel No</label>
+								                    <label class="form-control-label" for="contactno_home">Home Tel No</label>
 								                    <input type="text" name="contactno_home" id="contactno_home" parsley-trigger="change" placeholder="Home Tel No" class="form-control input-sm mask_phone" value="" />
 								                </div>
 								            </div>
 
 								            <div class="col-md-12">    
 								                <div class="form-group">
-								                    <label for="home_address">Address - Home <?=STARFIELD;?></label>
+								                    <label class="form-control-label" for="home_address">Address - Home <?=STARFIELD;?></label>
 								                    <textarea name="home_address" id="home_address" rows="5" style="resize: none; margin-top: 0px; margin-bottom: 0px; height: 100px; " parsley-trigger="change" <?=$required_field;?> placeholder="Address - Home" class="form-control input-sm turn_uppercase"></textarea>
 								                </div>
 								            </div>
 
 								            <div class="col-md-4">
 								               <div class="form-group">
-								                    <label for="home_postcode">Postcode <?=STARFIELD;?></label>
+								                    <label class="form-control-label" for="home_postcode">Postcode <?=STARFIELD;?></label>
 								                    <input type="text" name="home_postcode" id="home_postcode" parsley-trigger="change" <?=$required_field;?> placeholder="Postcode" class="form-control input-sm turn_uppercase" value="" />
 								                </div>
 								            </div>
 
 								            <div class="col-md-4">    
 								                <div class="form-group">
-								                    <label for="home_city">City <?=STARFIELD;?></label>
+								                    <label class="form-control-label" for="home_city">City <?=STARFIELD;?></label>
 								                    <input type="text" name="home_city" id="home_city" parsley-trigger="change" <?=$required_field;?> placeholder="City" class="form-control input-sm turn_uppercase" value="" />
 								                </div>
 								            </div>
 
 								            <div class="col-md-4">    
 								                <div class="form-group">
-								                    <label for="home_state">State <?=STARFIELD;?></label>
+								                    <label class="form-control-label" for="home_state">State <?=STARFIELD;?></label>
 		                                            <select class="form-control select-sm select2_field" name="home_state" id="home_state">
 		                                            	<option value="">Select State</option>
 								                    <?php
@@ -498,42 +554,42 @@ $(function(){
 
 								            <div class="col-md-6">
 									 			<div class="form-group">
-								                    <label for="job_position">Current Post</label>
+								                    <label class="form-control-label" for="job_position">Current Post</label>
 								                    <input type="text" name="job_position" id="job_position" parsley-trigger="change" placeholder="Current Post" class="form-control input-sm turn_uppercase" value="" />
 								                </div>
 								            </div>
 
 								            <div class="col-md-6">
 									 			<div class="form-group">
-								                    <label for="contactno_office">Office Tel No</label>
+								                    <label class="form-control-label" for="contactno_office">Office Tel No</label>
 								                    <input type="text" name="contactno_office" id="contactno_office" parsley-trigger="change" placeholder="Office Tel No" class="form-control input-sm mask_phone" value="" />
 								                </div>
 								            </div>
 
 											<div class="col-md-12">    
 								                <div class="form-group">
-								                    <label for="office_address">Address - Office</label>
+								                    <label class="form-control-label" for="office_address">Address - Office</label>
 								                    <textarea name="office_address" id="office_address" rows="5" style="resize: none; margin-top: 0px; margin-bottom: 0px; height: 100px; " parsley-trigger="change" placeholder="Address - Office" class="form-control input-sm turn_uppercase"></textarea>
 								                </div>
 								            </div>
 
 								            <div class="col-md-4">
 								               <div class="form-group">
-								                    <label for="office_postcode">Postcode</label>
+								                    <label class="form-control-label" for="office_postcode">Postcode</label>
 								                    <input type="text" name="office_postcode" id="office_postcode" parsley-trigger="change" placeholder="Postcode" class="form-control input-sm turn_uppercase" value="" />
 								                </div>
 								            </div>
 
 								            <div class="col-md-4">    
 								                <div class="form-group">
-								                    <label for="office_city">City</label>
+								                    <label class="form-control-label" for="office_city">City</label>
 								                    <input type="text" name="office_city" id="office_city" parsley-trigger="change" placeholder="City" class="form-control input-sm turn_uppercase" value="" />
 								                </div>
 								            </div>
 
 								            <div class="col-md-4">    
 								                <div class="form-group">
-								                    <label for="office_state">State</label>
+								                    <label class="form-control-label" for="office_state">State</label>
 		                                            <select class="form-control select-sm select2_field" name="office_state" id="office_state">
 		                                            	<option value="">Select State</option>
 								                    <?php
@@ -655,21 +711,27 @@ $(function(){
 										<legend>Agreements</legend>
 										<div class="row m-t-10">
 
-									 		<div class="col-md-12">
-									            <div class="checkbox checkbox-success">
+									 		<div class="col-md-12 cb-div">
+									            <div class="checkbox checkbox-success" style="margin-left:-3px;">
 								                    <input type="checkbox" class="custom-control-input" id="registration_agreement" name="registration_agreement" value="1" />
 								                    <label class="custom-control-label font-13" for="registration_agreement">I agree to abide by the Rules of the Malaysia Association of Environmental Health (MAEH).</label>
-								                </div> 
+								                </div>
+								                <?php if ( isset($validation_error->registration_agreement) ) { ?>
+							                    <div class="form-control-feedback" id="registration_agreement-error"><?=$validation_error->registration_agreement;?></div>
+							                    <?php } ?>
 								            </div>
 
-											<div class="col-md-12">
-									            <div class="checkbox checkbox-success">
+											<div class="col-md-12 cb-div">
+									            <div class="checkbox checkbox-success" style="margin-left:-3px;">
 								                    <input type="checkbox" class="custom-control-input" id="registration_payment" name="registration_payment" value="1" />
 								                    <label class="custom-control-label font-13" for="registration_payment">I enclosed herewith payment receipt for RM39.00 being the payment of yearly subscription RM36.00 and entrance fee RM3.00.<br />For students, yearly subscription RM10.00 and entrance fee RM3.00.</label>
-								                </div> 
+								                </div>
+								                <?php if ( isset($validation_error->registration_payment) ) { ?>
+							                    <div class="form-control-feedback" id="registration_payment-error"><?=$validation_error->registration_payment;?></div>
+							                    <?php } ?>
 								            </div>
 
-											<div class="col-md-6">
+											<div class="col-md-6 file-div">
 								                <div class="form-group">
 													<label for="payment_receipt">Payment Receipt <?=STARFIELD;?></label>
 							                        <input type="file" id="payment_receipt" name="payment_receipt" parsley-trigger="change" <?=$required_field;?> class="form-control input-sm-file" />
@@ -680,7 +742,7 @@ $(function(){
 														</small>
 													</span>
 							                    </div>
-								            </div>	
+								            </div>
 
 								            <div class="col-md-12 payment_receipt_file">
 								            </div>	
@@ -692,10 +754,7 @@ $(function(){
 
 									<input type="hidden" name="qualification_id" id="qualification_id" class="form-control input-sm" value="" />
 									<input type="hidden" name="organization_id" id="organization_id" class="form-control input-sm" value="" />
-									<input type="hidden" name="sid" id="sid" class="form-control input-sm" value="" />
-									<input type="hidden" name="sid2" id="sid2" class="form-control input-sm" value="" />
 									<input type="hidden" id="payment_receipt_uploaded" name="payment_receipt_uploaded" value="" />
-									<input type="hidden" name="submit_form" id="submit_form" class="form-control input-sm" value="" />
 
 							        <button type="submit" id="btn_submit" name="btn_submit"  class="btn btn-sm btn-success stepy-finish waves-effect waves-light">Submit</button>
 								 	<!-- end row m-t-20 --> 
@@ -751,10 +810,10 @@ function append_row_qualification(rand_id)
 {
     var add_row = '';
     add_row += '<tr id="tr_qualification_'+rand_id+'">';
-     add_row += '<td id="qc_'+rand_id+'"><select class="form-control select-sm select2_field" name="qualification_category[]" id="qualification_category_'+rand_id+'"></select></td>';
-    add_row += '<td><input type="text" name="qualification_title[]" id="qualification_title_'+rand_id+'" class="form-control input-sm turn_uppercase" value="" placeholder="Title/Result" /></td>';
-    add_row += '<td><input type="text" name="qualification_year[]" id="qualification_year_'+rand_id+'" class="form-control input-sm turn_uppercase qualification_year" value="" placeholder="Year" /></td>';
-    add_row += '<td><input type="text" name="qualification_institution[]" id="qualification_institution_'+rand_id+'" class="form-control input-sm turn_uppercase" value="" placeholder="School/College/University" /></td>';
+     add_row += '<td id="qc_'+rand_id+'"><div class="form-group"><select class="form-control select-sm select2_field" name="qualification_category[]" id="qualification_category_'+rand_id+'"></select></div></td>';
+    add_row += '<td><div class="form-group"><input type="text" name="qualification_title[]" id="qualification_title_'+rand_id+'" class="form-control input-sm turn_uppercase" value="" placeholder="Title/Result" /></div></td>';
+    add_row += '<td><div class="form-group"><input type="text" name="qualification_year[]" id="qualification_year_'+rand_id+'" class="form-control input-sm turn_uppercase qualification_year" value="" placeholder="Year" /></div></td>';
+    add_row += '<td><div class="form-group"><input type="text" name="qualification_institution[]" id="qualification_institution_'+rand_id+'" class="form-control input-sm turn_uppercase" value="" placeholder="School/College/University" /></div></td>';
     add_row += '<td class="text-center"><a href="javascript:void(0);" class="btn_remove_row btn-lg" title="Remove this row" onclick="remove_row_qualification(\''+rand_id+'\')"><i class="fa fa-trash text-danger"></i></a></td>';
     add_row += '</tr>';
     $('.tbody_qualification').append(add_row);
@@ -814,8 +873,8 @@ function append_row_organization(rand_id)
 {
     var add_row = '';
     add_row += '<tr id="tr_organization_'+rand_id+'">';
-    add_row += '<td><input type="text" name="organization_name[]" id="organization_name_'+rand_id+'" class="form-control input-sm turn_uppercase" value="" placeholder="Organization" /></td>';
-    add_row += '<td><input type="text" name="organization_post[]" id="qualification_post_'+rand_id+'" class="form-control input-sm turn_uppercase" value="" placeholder="Post" /></td>';
+    add_row += '<td><div class="form-group"><input type="text" name="organization_name[]" id="organization_name_'+rand_id+'" class="form-control input-sm turn_uppercase" value="" placeholder="Organization" /></div></td>';
+    add_row += '<td><div class="form-group"><input type="text" name="organization_post[]" id="qualification_post_'+rand_id+'" class="form-control input-sm turn_uppercase" value="" placeholder="Post" /></div></td>';
     add_row += '<td class="text-center"><a href="javascript:void(0);" class="btn_remove_row btn-lg" title="Remove this row" onclick="remove_row_organization(\''+rand_id+'\')"><i class="fa fa-trash text-danger"></i></a></td>';
     add_row += '</tr>';
     $('.tbody_organization').append(add_row);
@@ -847,63 +906,6 @@ function remove_row_organization(rand_id)
     $('#tr_organization_'+rand_id).remove();
 }
 
-function save_data(form_data)
-{
-	var sid = $('#sid').val();
-	var sid2 = $('#sid2').val();
-
-	$.ajax({
-        url: "<?=site_url('registration-submit');?>",
-        type: "POST",
-        data: form_data,
-        dataType: "json",
-        processData: false,
-        contentType: false,
-		cache: false,
-
-        success: function (response) {
-            
-            // console.log('save_data response',response);
-
-            if ( response.rst == 1 )
-            { 
-				if ( sid == '' ) 
-				{
-					$('#sid').val(response.data.sid);
-				}
-
-				if ( sid2 == '' ) 
-				{
-					$('#sid2').val(response.data.sid2);
-				}
-            }
-            else if ( response.rst == -1 )
-            {
-	            msg_title = response.msg;
-				msg_content = 'Click <a href="">here</a> to check your status';
-				msg_status = 'error';
-				
-				swal({
-					title: msg_title,
-					html: msg_content,
-					type: msg_status,
-					allowOutsideClick: false
-				}).then(function () {
-					$("#form_registration").find('fieldset').eq(1).hide();
-					$("#form_registration").stepy('step', 1);
-				});
-            }
-            else
-            {
-            }
-        },
-
-        error: function (e) {
-            console.log(e);
-        }
-    });
-}
-
 $(function(){
 
 	var form_data;
@@ -924,23 +926,247 @@ $(function(){
 			{
 			}
 
-        	form_data = new FormData($("#form_registration")[0]);
-			// console.log('form_data', form_data);
-
-			save_data(form_data);
+			if ($("#form_registration").valid()) {} 
+	        else 
+	        {
+	        	swal({
+					title: 'Ops! Please fill in the required details',
+					html: '',
+					type: 'error',
+					allowOutsideClick: false
+				}).then(function () {
+				});
+	          	return false;
+	        }
 		},
         back: function(index) {
         },
 		finish: function() {
-			$("#submit_form").val(1);
+			if ($("#form_registration").valid()) {} 
+	        else 
+	        {
+	        	swal({
+					title: 'Ops! Please fill in the required details',
+					html: '',
+					type: 'error',
+					allowOutsideClick: false
+				}).then(function () {
+				});
+	          	return false;
+	        }
 		}
-    }); 
+    });
 
 	// Apply "Back" and "Next" button styling
     $('.stepy-navigator').find('.button-next').addClass('btn btn-sm btn-primary');
     $('.stepy-step').find('.button-back').addClass('btn btn-sm btn-primary pull-left'); 
 
 	/* End Step Wizard Form */
+
+	$.validator.addMethod("validate_inputmask", function(value, element) {
+		value = value.replace(/_/g, '');
+
+		if ( element.id == 'icno' ) {
+			return value.length >= 14 && value.length <= 14;
+		} else if ( element.id == 'contactno_mobile' ) {
+			return value.length >= 10;
+		} else if ( element.id == 'contactno_home' || element.id == 'contactno_office' ) {
+			value = value.substr(3);
+			return !value || value.length >= 8;
+		} else {
+			return true;
+		}
+	}, "Invalid format");
+
+	$.validator.addMethod("validate_inputdate", function(value, element) {
+		var pattern = /^\d{2}\/\d{2}\/\d{4}$/;
+        return pattern.test(value);
+	}, "Invalid date format");
+
+	$.validator.addMethod('validate_inputfile', function(value, element, limit) {
+	    return !element.files[0] || (element.files[0].size <= limit);
+	}, 'Invalid file size (Max 2MB)');
+
+    $("#form_registration").validate({
+    	errorElement: 'div',
+        errorPlacement: function (error, element) {
+			$(element).closest('.form-group').addClass('has-danger');
+			if (element.hasClass("select2-hidden-accessible")) {
+				element.closest(".form-group").find(".form-control-feedback").remove();
+				error.addClass('form-control-feedback');
+				error.insertAfter(element.next(".select2-container"));
+				element.next(".select2-container").addClass('form-control-danger');
+
+	        } else if (element.parent('.checkbox').length) {
+	        	console.log('element', element);
+				element.closest(".cb-div").find(".form-control-feedback").remove();
+				error.addClass('form-control-feedback');
+		        error.insertAfter(element.parent());
+
+		    } else {
+				element.next(".form-control-feedback").remove();
+				error.addClass('form-control-feedback');
+				error.insertAfter(element);
+	            element.addClass('form-control-danger');
+	        }
+        },
+        highlight: function (element, errorClass, validClass) {
+			$(element).closest('.form-group').addClass('has-danger').removeClass('has-success');
+			if ($(element).hasClass("select2-hidden-accessible")) {
+				// $('.select2_field').select2({ containerCssClass : 'select2-container--custom-validation' });
+				$(element).next(".select2-container").find(".select2-selection").removeClass('select2-container--custom-validation').addClass('select2-container--custom-validation');
+				$(element).next(".select2-container").addClass('form-control-danger').removeClass('form-control-success');
+			} else {
+				$(element).addClass('form-control-danger').removeClass('form-control-success');
+			}
+        },
+        unhighlight: function (element, errorClass, validClass) {
+			$(element).closest('.form-group').addClass('has-success').removeClass('has-danger');
+			if ($(element).hasClass("select2-hidden-accessible")) {
+        		// $('.select2_field').select2({ containerCssClass : 'select2-container--custom-validation' });
+				$(element).next(".select2-container").find(".select2-selection").removeClass('select2-container--custom-validation').addClass('select2-container--custom-validation');
+				$(element).next(".select2-container").addClass('form-control-success').removeClass('form-control-danger');
+			} else {
+				$(element).addClass('form-control-success').removeClass('form-control-danger');
+			}
+        },
+    	rules: {
+    		membership_type_id: "required",
+    		name: {
+    			required: true,
+    			minlength: 5
+    		},
+            icno: {
+    			required: true,
+		        // digits: true,
+		        minlength: 14,
+		        maxlength: 14,
+		        validate_inputmask: true,
+		        remote: {
+					url: "<?=site_url('registration-validate');?>",
+					type: "POST",
+					data: {
+						icno: function() {
+							return $("#icno").val();
+						},
+						process: "validate_icno"
+					}
+				}
+    		},
+            contactno_mobile: {
+    			required: true,
+		        // digits: true,
+		        minlength: 10,
+		        validate_inputmask: true
+    		},
+		    email: {
+		      required: true,
+		      email: true
+		    },
+		    dob: {
+		    	required: true,
+            	validate_inputdate: true
+		    },
+            contactno_home: {
+		        // digits: true,
+		        minlength: 10,
+		        validate_inputmask: true
+    		},
+    		home_address: "required",
+    		home_postcode: {
+    			required: true,
+		        minlength: 4,
+		        maxlength: 8
+    		},
+    		home_city: "required",
+    		home_state: "required",
+            contactno_office: {
+		        // digits: true,
+		        minlength: 10,
+		        validate_inputmask: true
+    		},
+    		office_postcode: {
+		        minlength: 4,
+		        maxlength: 8
+    		},
+    		// https://stackoverflow.com/questions/24670447/how-to-validate-array-of-inputs-using-validate-plugin-jquery
+    		"qualification_category[]": "required",
+    		"qualification_title[]": "required",
+    		"qualification_year[]": "required",
+    		"qualification_institution[]": "required",
+    		"organization_name[]": "required",
+    		"organization_post[]": "required",
+    		registration_agreement: "required",
+    		registration_payment: "required",
+    		payment_receipt: {
+    			required: true,
+    			extension: "jpeg|jpg|png|pdf",
+    			validate_inputfile: 2097152
+    		}
+        },
+        messages: {
+    		membership_type_id: "Membership Type is required",
+        	name: {
+		        required: "Name is required",
+		        minlength: "Name must be at least 5 characters long"
+		    },
+            icno: {
+		        required: "IC No is required",
+		        // digits: "IC No require only number format",
+		        minlength: "Invalid format of IC No",
+		        maxlength: "Invalid format of IC No",
+		        remote: "IC No already exists"
+		    },
+            contactno_mobile: {
+		        required: "HP No is required",
+		        // digits: "HP No require only number format",
+		        minlength: "Invalid format of HP No",
+		    },
+		    email: {
+		      	required: "Email Address is required",
+		      	email: "Invalid format of Email Address"
+		    },
+		    dob: {
+		      	required: "Date of Birth is required"
+		    },
+            contactno_home: {
+		        // digits: "Home Tel No require only number format",
+		        minlength: "Invalid format of Home Tel No",
+		    },
+		    home_address: "Address - Home is required",
+		    home_postcode: {
+		    	required: "Postcode is required",
+		        minlength: "Invalid format of Postcode",
+		        maxlength: "Invalid format of Postcode",
+		    },
+		    home_city: "City is required",
+    		home_state: "State is required",
+    		"qualification_category[]": "Qualification is required",
+    		"qualification_title[]": "Title/Result is required",
+    		"qualification_year[]": "Year is required",
+    		"qualification_institution[]": "School/College/University info is required",
+    		"organization_name[]": "Organization info is required",
+    		"organization_post[]": "Post is required",
+    		registration_agreement: "Check is required",
+    		registration_payment: "Check is required",
+    		payment_receipt: {
+    			required: "Payment Receipt is required",
+    			extension: "Invalid file type (jpeg, jpg, png, pdf)"
+    		}
+        }
+    });
+
+	$('#datepicker-dob').datepicker().on('changeDate', function(e) {
+        $(this).valid();
+    });
+
+    $('.select2_field').on('change', function(e) {
+	    $(this).valid();
+	});
+
+    $('#table_qualification').on('change', '.select2_field, .qualification_year', function(e) {
+    	$(this).valid();
+    });
 
 	// when click button btn_add_qualification
 	$('#btn_add_qualification').click(function(){
@@ -992,6 +1218,8 @@ $(function(){
     	var form_data = new FormData($("#form_registration")[0]);
     	form_data.append('payment_receipt', file);
     	form_data.append('attachment_field_name', 'payment_receipt');
+
+    	if ($(this).valid()) { } else { return false; }
 
     	$('#payment_receipt_uploaded').val('');
 
